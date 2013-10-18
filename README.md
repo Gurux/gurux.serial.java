@@ -33,12 +33,12 @@ Before use you must set following settings:
 * Parity
 * StopBits
 
-It is also good to add listener to listen following events.
-* OnError
-* OnReceived
-* OnMediaStateChange
-
-
+It is also good to add listener and start to listen following events.
+* onError
+* onReceived
+* onMediaStateChange
+* onTrace
+* onPropertyChanged
 ```java
 
 GXSerial cl = new GXSerial();
@@ -46,7 +46,7 @@ cl.setPortName(gurux.serial.GXSerial.getPortNames()[0]);
 cl.setBaudRate(9600);
 cl.setDataBits(8);
 cl.setParity(Parity.ODD);
-cl.setStopBits = StopBits.ONE;
+cl.setStopBits(StopBits.ONE);
 cl.open();
 
 ```
