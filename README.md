@@ -14,8 +14,8 @@ We are updating documentation on Gurux web page.
 
 If you have problems you can ask your questions in Gurux [Forum](http://www.gurux.org/forum).
 
-Before use you must combile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project.
-After it is combiled you must copy it to Java Runtime Environment's folder.
+Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project.
+After it is compiled you must copy it to Java Runtime Environment's folder.
 
 For version 1.6.0, this usually is 
 c:\Program Files\Java\jre1.6.0_01 or c:\Program Files x86\Java\jre1.6.0_01
@@ -39,6 +39,7 @@ It is also good to add listener and start to listen following events.
 * onMediaStateChange
 * onTrace
 * onPropertyChanged
+
 ```java
 
 GXSerial cl = new GXSerial();
