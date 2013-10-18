@@ -59,8 +59,7 @@ cl.Send("Hello World!");
 ```
 In default mode received data is coming as asynchronously from OnReceived event.
 
-Event listener is added like this:
-1. Ads class that you want to use to listen media events and derive class from IGXMediaListener.
+Event listener is adding class that you want to use to listen media events and derive class from IGXMediaListener.
 
 ```java
 */
