@@ -8,7 +8,7 @@ Open Source GXSerial media component, made by Gurux Ltd, is a part of GXMedias s
 
 For more info check out [Gurux](http://www.gurux.org/ "Gurux").
 
-With gurux.net component you can send data easily syncronously or asyncronously.
+With gurux.serial component you can send data easily syncronously or asyncronously.
 
 We are updating documentation on Gurux web page. 
 
