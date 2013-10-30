@@ -14,7 +14,7 @@ We are updating documentation on Gurux web page.
 
 If you have problems you can ask your questions in Gurux [Forum](http://www.gurux.org/forum).
 
-Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project or you can download it <a href="www.gurux.org/Downloads/gurux.serial.java.zip">here</a>.
+Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project or you can download it [here](www.gurux.org/Downloads/gurux.serial.java.zip "gurux.serial.java.zip").
 We have build dll for Windows 32, Windows 64 and for 32 bit Linux.
 
 After it is compiled you must copy it to Java Runtime Environment's folder.
