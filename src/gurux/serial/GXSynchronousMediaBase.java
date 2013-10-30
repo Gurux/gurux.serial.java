@@ -129,7 +129,7 @@ class GXSynchronousMediaBase
     {
         synchronized (m_ReceivedSync)
         {
-            //Alocate new buffer.
+            //Allocate new buffer.
             if (m_ReceivedSize + count > m_Received.length)
             {
                 byte[] tmp = new byte[2 * m_Received.length];

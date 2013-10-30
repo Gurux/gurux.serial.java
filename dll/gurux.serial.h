@@ -81,8 +81,9 @@ static void ReportError(JNIEnv* env, DWORD err);
 
 #else //LINUX
 
-// http://ulisse.elettra.trieste.it/services/doc/serial/config.html
-void GetLinuxSerialPorts(std::vector<std::basic_string<char> > ports);
+static basic_string<char> GetDriver(const basic_string<char>& tty);
+static void GetComPort(const string& dir, vector<basic_string<char> >& ports);
+void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& ports);
 
 #endif
 
@@ -95,13 +96,13 @@ extern "C"
 JNIEXPORT jobjectArray JNICALL Java_gurux_serial_NativeCode_getPortNames(JNIEnv* env, jclass clazz);
 
 extern "C"
-JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port);
+JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort, jlong closing);
 
 extern "C"
-JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout);
+JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing);
 
 extern "C"
 JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_write(JNIEnv* env, jclass clazz, jlong hComPort, jbyteArray data, jint writeTimeout);
@@ -159,3 +160,9 @@ JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBytesToWrite(JNIEnv* env,
 
 extern "C"
 JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getCDHolding(JNIEnv* env, jclass clazz, jlong hComPort);
+
+extern "C"
+JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort);
+
+extern "C"
+JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setHandshake(JNIEnv* env, jclass clazz, jlong hComPort, jint value);

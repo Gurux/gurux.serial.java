@@ -14,13 +14,17 @@ We are updating documentation on Gurux web page.
 
 If you have problems you can ask your questions in Gurux [Forum](http://www.gurux.org/forum).
 
-Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project.
+Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project or you can download it <a href="www.gurux.org/Downloads/gurux.serial.java.zip">here</a>.
+We have build dll for Windows 32, Windows 64 and for 32 bit Linux.
+
 After it is compiled you must copy it to Java Runtime Environment's folder.
+
+For Windows:
 
 For version 1.6.0, this usually is 
 c:\Program Files\Java\jre1.6.0_01 or c:\Program Files x86\Java\jre1.6.0_01
 
-Copy gurux.serial.java.dll to c:\Program Files\Java\jre1.6.0_01\bin\ 
+For Linux you can copy it to /lib folder.
 
 After that you can start to use Gurux serial port component.
 
@@ -65,7 +69,7 @@ Event listener is adding class that you want to use to listen media events and d
 */
  Media listener.
 */
-public class GXNetListener implements IGXMediaListener, gurux.net.IGXNetListener
+public class GXSerialListener implements IGXMediaListener
 {
 	/** 
     Represents the method that will handle the error event of a Gurux component.
@@ -141,7 +145,7 @@ cl.addListener(this);
 Data can be also send as syncronous if needed.
 
 ```java
-synchronized (Media.getSynchronous())
+synchronized (cl.getSynchronous())
 {
     String reply = "";    
     ReceiveParameters<byte[]> p = new ReceiveParameters<byte[]>(byte[].class);    
@@ -150,9 +154,9 @@ synchronized (Media.getSynchronous())
     //How long reply is waited.   
     p.setWaitTime(1000);          
     cl.send("Hello World!", null);
-    if (!gxNet1.receive(p))
+    if (!cl.receive(p))
     {
-		throw new RuntimeException("Failed to receive response..");
+        throw new RuntimeException("Failed to receive response..");
     }
 }
 ```

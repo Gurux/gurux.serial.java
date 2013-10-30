@@ -166,18 +166,30 @@ class GXReceiveThread extends Thread
     */
     @Override
     public final void run()
-    {        
+    {            	
         while(!Thread.currentThread().isInterrupted())
         {
             try
             {   
-                byte[] buff = NativeCode.read(this.ComPort, m_Parent.m_ReadTimeout);
+                byte[] buff = NativeCode.read(this.ComPort, m_Parent.m_ReadTimeout, m_Parent.m_Closing);
+                //If connection is closed.
+                if (buff.length == 0)
+                {
+                    m_Parent.m_Closing = 0;
+                    break;                	
+                }
                 handleReceivedData(buff);
             }
             catch(Exception ex)
-            {                
-                m_Parent.notifyError(new RuntimeException(ex.getMessage()));
-                continue;
+            { 
+                if (!Thread.currentThread().isInterrupted())
+                {
+                    m_Parent.notifyError(new RuntimeException(ex.getMessage()));
+                }
+                else
+                {
+                    break;                
+                }
             }
         }
     }

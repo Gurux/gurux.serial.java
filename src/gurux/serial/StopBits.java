@@ -39,6 +39,10 @@ package gurux.serial;
  */
 public enum StopBits {
     /*
+     * Stop bit is not used.
+     */
+	NONE,
+	/*
      * One stop bit is used.
      */
     ONE,

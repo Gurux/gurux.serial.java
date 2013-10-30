@@ -117,6 +117,7 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, BOOL bSho
 int GXGetCommState(HANDLE hWnd, LPDCB DCB)
 {
 	ZeroMemory(DCB, sizeof(LPDCB));
+	DCB->DCBlength = sizeof(DCB);
 	if (!GetCommState(hWnd, DCB))
 	{
 		DWORD err = GetLastError(); //Save occured error.
@@ -189,51 +190,113 @@ void ReportError(JNIEnv* env, DWORD err)
 }
 
 #else
+/*
+#include <termios.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+*/
 
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <linux/serial.h>
 
-void GetLinuxSerialPorts(std::vector<std::basic_string<char> > ports)
+#include <stdio.h>
+#include <sys/signal.h>
+
+#define _POSIX_SOURCE 1 /* POSIX compliant source */
+
+
+basic_string<char> GetDriver(const basic_string<char>& tty)
 {
-    FILE* proc_fd=NULL;
-    char proc_line[80];
+    struct stat st;
+    string devicedir = tty;
 
-    // maybe we should read and analyse /proc/tty/driver/serial
-    // 0: uart:16550A port:3F8 irq:4 tx:0 rx:0
-    // 1: uart:16550A port:2F8 irq:3 tx:0 rx:0
-    // 2: uart:unknown port:3E8 irq:4
+    // Append '/device' to the tty-path
+    devicedir += "/device";
 
-    proc_fd = fopen("/proc/tty/driver/serial","r");
-    if (proc_fd == NULL)
+    // Stat the device dir and handle it if it is a symlink
+    if (lstat(devicedir.c_str(), &st)==0 && S_ISLNK(st.st_mode))
     {
-		//Mikko "Failed to find any serial ports.";
+        char buffer[256];
+        memset(buffer, 0, sizeof(buffer));
+        // Append '/driver' and return basename of the target
+        devicedir += "/driver";
+        if (readlink(devicedir.c_str(), buffer, sizeof(buffer)) > 0)
+        {
+            return basename(buffer);
+        }
     }
+    return "";
+}
 
-    char done = 0;
-    do
+void GetComPort(const string& dir, vector<basic_string<char> >& ports)
+{
+    // Get the driver the device is using
+    string driver = GetDriver(dir);
+    struct serial_struct serinfo;
+    // Skip devices without a driver
+    if (driver.size() > 0)
     {
-		if (fgets(proc_line, 77, proc_fd) == NULL)
-		{
-			//If not end of line it is an error.
-			if (!feof(proc_fd))
+        string devfile = string("/dev/") + basename(dir.c_str());
+        if (driver == "serial")
+        {
+        	// Try to open the device
+			int fd = open(devfile.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
+			if (fd >= 0)
 			{
-				//Mikko count = -1;
+				// Get serial_info
+				if (ioctl(fd, TIOCGSERIAL, &serinfo)==0)
+				{
+					// If device type is no PORT_UNKNOWN we accept the port
+					if (serinfo.type != PORT_UNKNOWN)
+					{
+						ports.push_back(devfile);
+					}
+				}
+				close(fd);
 			}
-			proc_line[0]='\0';
-			done=1;
-		}
-		else
-		{
-			if (strstr(proc_line,"unknown") == NULL && strstr(proc_line,"tx:") != NULL)
-			{
-				printf("match: %s\n",proc_line);
-				//Mikko ports.push_back();
-			}
-		}
+        }
     }
-    while (!done);
-    fclose(proc_fd);
+}
+
+void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& ports)
+{
+	int pos;
+	struct dirent **namelist;
+	const char* sysdir = "/sys/class/tty/";
+	// Scan through /sys/class/tty.
+	// it contains all tty-devices in the system
+	pos = scandir(sysdir, &namelist, NULL, NULL);
+	if (pos < 0)
+	{
+		ReportError(env, "Failed to enumerate serial ports.");
+	}
+	while (pos--)
+	{
+		if (strcmp(namelist[pos]->d_name, "..") != 0
+				&& strcmp(namelist[pos]->d_name, ".") != 0)
+		{
+			// Construct full absolute file path
+			string devicedir = sysdir;
+			devicedir += namelist[pos]->d_name;
+			// Register the device
+			GetComPort(devicedir, ports);
+		}
+		free(namelist[pos]);
+	}
+	free(namelist);
 }
 #endif
 
@@ -251,6 +314,7 @@ JNIEXPORT jobjectArray JNICALL Java_gurux_serial_NativeCode_getPortNames(JNIEnv*
 		portItems.push_back(str);
 	}	
 #else //If Linux
+	GetLinuxSerialPorts(env, portItems);
 #endif
 
 	jclass stringClass = env->FindClass("java/lang/String");
@@ -264,19 +328,21 @@ JNIEXPORT jobjectArray JNICALL Java_gurux_serial_NativeCode_getPortNames(JNIEnv*
 	return ports;
 }
 
-JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port)
+void signal_handler_IO (int status)
+{
+printf("received SIGIO signal.\n");
+//        wait_flag = FALSE;
+}
+
+JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing)
 {
 	jboolean isCopy;
 #if defined(_WINDOWS)
 	const char* pPort = env->GetStringUTFChars(port, &isCopy);
+	std::string port2(pPort);
 	std::string buff("\\\\.\\");
 	buff.append(pPort);
 	env->ReleaseStringUTFChars(port, pPort);
-	COMMCONFIG commConfig = {0};
-	DWORD dwSize = sizeof(commConfig);
-	commConfig.dwSize = dwSize;
-	//This might fail with virtual COM ports are used.
-	GetDefaultCommConfigA(pPort, &commConfig, &dwSize);
 	//Open serial port for read / write. Port can't share.
 	HANDLE hComPort = CreateFileA(buff.c_str(), 
 					GENERIC_READ | GENERIC_WRITE, 0, NULL, 
@@ -284,15 +350,34 @@ JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env,
 	if (hComPort == INVALID_HANDLE_VALUE)
 	{
 		ReportError(env, GetLastError());			
-	}
-	int ret;
-	if ((ret = GXSetCommState(hComPort, &commConfig.dcb)) != 0)	
+	}	
+	DCB dcb = {0};
+	dcb.DCBlength = sizeof(DCB);
+	dcb.BaudRate = 9600;
+	dcb.fBinary = 1;
+	dcb.fDtrControl = DTR_CONTROL_ENABLE;
+	dcb.fRtsControl = DTR_CONTROL_ENABLE;
+	dcb.fOutX = dcb.fInX = 0;
+    //CTS handshaking on output.
+	dcb.fOutxCtsFlow = DTR_CONTROL_DISABLE;
+    //DSR handshaking on output
+	dcb.fOutxDsrFlow = DTR_CONTROL_DISABLE;    
+	//Abort all reads and writes on Error.
+	dcb.fAbortOnError = 1;
+    dcb.ByteSize = 8;
+    //Parity = None.
+	dcb.Parity = 0;
+	//StopBits = 1;
+	dcb.StopBits = 0;
+	int ret;	
+	if ((ret = GXSetCommState(hComPort, &dcb)) != 0)	
 	{
 		ReportError(env, ret);
 	}
+	jlong hClosing = (jlong) ::CreateEvent(NULL, TRUE, FALSE, NULL);
+	env->SetLongArrayRegion(closing, 0, 1, &hClosing);	
 	return (long) hComPort;
-
-#else //#if defined(__LINUX__) && !defined(__CYGWIN__)
+#else //#if defined(__LINUX__)
 	const char* pPort = env->GetStringUTFChars(port, &isCopy);
 	std::string buff(pPort);
 	env->ReleaseStringUTFChars(port, pPort);
@@ -300,23 +385,54 @@ JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env,
 	// file description for the serial port
 	int hComPort; 
 	// read/write | not controlling term | don't wait for DCD line signal.
-	hComPort = open(buff.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);	
-	if(hComPort == -1) // if open is unsucessful
+	hComPort = open(buff.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+	if(hComPort == -1) // if open is unsuccessful.
 	{
 		buff.insert(0, "Failed to Open port: ");
 		ReportError(env, buff.c_str());
 	}
 	else
 	{
-		fcntl(hComPort, F_SETFL, 0);
+		if(!isatty(hComPort))
+		{
+			ReportError(env, "Failed to Open port. This is not a serial port.");
+		}
+
+		if ((ioctl(hComPort, TIOCEXCL) == -1))
+		{
+			ReportError(env, "Failed to Open port. Exclusive access denied.");
+		}
+
+		struct termios options;
+		memset(&options,0,sizeof(options));
+		options.c_iflag=0;
+		options.c_oflag=0;
+		options.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+		options.c_lflag=0;
+		options.c_cc[VMIN] = 1;
+		options.c_cc[VTIME] = 5;
+		//Set Baud Rates
+		cfsetospeed (&options, B9600);
+		cfsetispeed (&options, B9600);
+
+		//hardware flow control is used as default.
+		//options.c_cflag |= CRTSCTS;
+		if (tcsetattr(hComPort, TCSAFLUSH, &options) != 0)
+		{
+			ReportError(env, "Failed to Open port. tcsetattr failed.");
+			//errno
+		}
 	}
 	return hComPort;
 #endif
 }
 
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort, jlong closing)
 {	
+	if (hComPort != 0)
+	{
 #if defined(_WINDOWS)
+	::SetEvent((HANDLE) closing); 	
 	if (!CloseHandle((HANDLE) hComPort))
 	{
 		ReportError(env, GetLastError());
@@ -328,9 +444,27 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env,
 		ReportError(env, "Failed to close port.");
 	}
 #endif
+	}
 }
 
-JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout)
+static std::string toHex(unsigned char* pBytes, int len)
+{
+	const char hexArray[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	char* hexChars = new char[len * 3];
+	int tmp;
+	for (int pos = 0; pos != len; ++pos)
+	{
+		tmp = pBytes[pos] & 0xFF;
+		hexChars[pos * 3] = hexArray[tmp >> 4];
+		hexChars[pos * 3 + 1] = hexArray[tmp & 0x0F];
+		hexChars[pos * 3 + 2] = ' ';
+	}
+	std::string str(hexChars);
+	delete hexChars;
+	return str;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing)
 {
 	int readBufferSize = 1;
 #if defined(_WINDOWS)
@@ -362,9 +496,17 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jcla
 		if (err != ERROR_IO_PENDING)     
 		{
 			delete pBuff;
+			if (err == ERROR_INVALID_HANDLE) 
+			{
+				CloseHandle((HANDLE) closing);
+				return env->NewByteArray(0);
+			}						
 			ReportError(env, err);
 		}
-		DWORD received = WaitForSingleObject(osRead.hEvent, readTimeout);
+		HANDLE h[2];
+		h[0] = osRead.hEvent;
+		h[1] = (HANDLE) closing;
+		DWORD received = WaitForMultipleObjects(2, h, FALSE, readTimeout);
 		if (received == WAIT_TIMEOUT)
 		{
 			delete pBuff;
@@ -381,8 +523,14 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jcla
 			}
 			ReportError(env, err);
 		}
+		//If closed.
+		if (received == WAIT_OBJECT_0 + 1)
+		{
+			CloseHandle((HANDLE) closing);
+			NumberOfBytesRead = 0;
+		}
 		//How many bytes we can read...		
-		if (!GetOverlappedResult((HANDLE) hComPort, &osRead, &NumberOfBytesRead, TRUE))
+		else if (!GetOverlappedResult((HANDLE) hComPort, &osRead, &NumberOfBytesRead, TRUE))
 		{
 			delete pBuff;
 			DWORD err = GetLastError();
@@ -400,18 +548,50 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jcla
 	delete pBuff;
 	return data;
 #else
-	unsigned char* pBuff = new unsigned char[readBufferSize];
-    int ret = read(hComPort, pBuff, readBufferSize);
+	//Get bytes available.
+	int ret = ioctl(hComPort, FIONREAD, &readBufferSize);
 	if (ret < 0)
 	{
-		delete pBuff;
-		ReportError(env, "Read failed.");
+		ReportError(env, "getBytesToRead failed.");
 	}
-	if (ret == 0)
+	//Try to read at least one byte.
+	if (readBufferSize == 0)
 	{
-		delete pBuff;
-		ReportError(env, "Read failed. Timeout occurred.");
+		readBufferSize = 1;
 	}
+	unsigned char* pBuff = new unsigned char[readBufferSize];
+    do
+    {
+		ret = read(hComPort, pBuff, readBufferSize);
+		if (ret == -1)
+		{
+			if (errno == EAGAIN)
+			{
+				ret = 0;
+				usleep(100000);
+			}
+			//Return empty list if connection is closed.
+			else if (errno == EBADF)
+			{
+				ret = 0;
+				break;
+			}
+			else
+			{
+				delete pBuff;
+				char buff[50];
+				sprintf(buff, "Read failed %d", errno);
+				ReportError(env, buff);
+			}
+		}
+		/*
+		else if (ret != 0)
+		{
+			printf(": %s\r\n", toHex(pBuff, ret).c_str());
+		}
+		*/
+    }
+    while(ret == 0);
 	jbyteArray data = env->NewByteArray(ret);
 	env->SetByteArrayRegion(data, 0, ret, (jbyte*) pBuff);
 	delete pBuff;
@@ -467,7 +647,7 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_write(JNIEnv* env, jclass cl
 		env->GetByteArrayRegion(data, 0, len, (jbyte*) pData);
 	    int ret = write(hComPort, pData, len);
 		delete pData;
-		if (ret < 0)
+		if (ret != len)
 		{
 			ReportError(env, "Write failed.");
 		}
@@ -494,7 +674,40 @@ JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBaudRate(JNIEnv* env, jcl
 	}
 
 	// Get input baud rate.
-	return cfgetispeed(&options);    
+	ret = cfgetispeed(&options);
+	switch(ret)
+	{
+		case B50:
+			return 50;
+		case B75:
+			return 75;
+		case B110:
+			return 110;
+		case B134:
+			return 134;
+		case B150:
+			return 150;
+		case B200:
+			return 200;
+		case B600:
+			return 600;
+		case B1200:
+			return 1200;
+		case B1800:
+			return 1800;
+		case B2400:
+			return 2400;
+		case B4800:
+			return 4800;
+		case B9600:
+			return 9600;
+		case B19200:
+			return 19200;
+		case B38400:
+			return 38400;
+	}
+	ReportError(env, "Invalid baud rate.");
+	return -1;
 #endif
 }
 
@@ -520,6 +733,57 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setBaudRate(JNIEnv* env, jcl
 	{
 		ReportError(env, "Failed to get settings for serial port.");
 	}
+	switch(value)
+	{
+		case 50:
+		   value = B50;
+		break;
+		case 75:
+		   value = B75;
+		break;
+		case 110:
+		   value = B110;
+		break;
+		case 134:
+		   value = B134;
+		break;
+		case 150:
+		   value = B150;
+		break;
+		case 200:
+		   value = B200;
+		break;
+		case 300:
+		   value = B300;
+		break;
+		case 600:
+		   value = B600;
+		break;
+		case 1200:
+		   value = B1200;
+		break;
+		case 1800:
+		   value = B1800;
+		break;
+		case 2400:
+		   value = B2400;
+		break;
+		case B4800:
+		   value = B4800;
+		break;
+		case 9600:
+		   value = B9600;
+		break;
+		case 19200:
+		   value = B19200;
+		break;
+		case 38400:
+		   value = B38400;
+		break;
+		default:
+			ReportError(env, "Invalid value.");
+	}
+
 	// Set baud rates.
 	cfsetispeed(&options, value);    
 	cfsetospeed(&options, value);	
@@ -852,15 +1116,14 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setRtsEnable(JNIEnv* env, jc
 		tmp = CLRRTS;
 	}
 
-	int ret;
-	if ((ret = EscapeCommFunction((HANDLE) hComPort, tmp)) != 0)	
+	if (EscapeCommFunction((HANDLE) hComPort, tmp) == 0)	
 	{
-		ReportError(env, ret);
+		ReportError(env, GetLastError());
 	}
 #else
 	int status = 0;
 	int ret = ioctl(hComPort, TIOCMGET, &status);
-	if (ret < 0)
+	if (ret != 0)
 	{
 		ReportError(env, "setRtsEnable failed.");
 	}
@@ -873,7 +1136,7 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setRtsEnable(JNIEnv* env, jc
         status &= ~TIOCM_RTS;
 	}
 	ret = ioctl(hComPort, TIOCMSET, &status);
-	if (ret < 0)
+	if (ret != 0)
 	{
 		ReportError(env, "setRtsEnable failed.");
 	}
@@ -909,11 +1172,9 @@ JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setDtrEnable(JNIEnv* env, jc
 	{
 		tmp = CLRDTR;
 	}
-
-	int ret;
-	if ((ret = EscapeCommFunction((HANDLE) hComPort, tmp)) != 0)	
+	if (EscapeCommFunction((HANDLE) hComPort, tmp) == 0)	
 	{
-		ReportError(env, ret);
+		ReportError(env, GetLastError());
 	}
 #else
 	int status = 0;
@@ -1012,13 +1273,17 @@ JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBytesToWrite(JNIEnv* env,
 	}
 	return comstat.cbOutQue;
 #else
+	//There is no FIONWRITE in Linux so return always Zero.
+	return 0;
+	/*
 	int value = 0;
-	int ret = 0;//Mikko TODO ioctl(hComPort, FIONWRITE, &value);
+	int ret = ioctl(hComPort, FIONWRITE, &value);
 	if (ret < 0)
 	{
-		ReportError(env, "getBytesToWrite failed.");
+		ReportError(env, "getBytesToWrite failed in Linux.");
 	}
 	return value;
+	*/
 #endif
 }
 
@@ -1040,4 +1305,157 @@ JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getCDHolding(JNIEnv* env, jc
 	}
 	return (status & TIOCM_CD) != 0;
 #endif
+}
+
+JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort)
+{
+#if defined(_WINDOWS)
+	DCB dcb;
+	int ret;
+	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
+	{
+		ReportError(env, ret);
+	}
+	// Disable DTR monitoring
+	if (dcb.fDtrControl == DTR_CONTROL_DISABLE && 
+		// Disable RTS (Ready To Send)
+		dcb.fRtsControl == DTR_CONTROL_DISABLE)
+	{
+		// Enable XON/XOFF for transmission
+		if (dcb.fOutX && 							
+			// Enable XON/XOFF for receiving
+			dcb.fInX)
+		{
+			//XOnXOff
+			return 1;
+		}
+		//None
+		return 0;
+	}
+
+	// Enable XON/XOFF for transmission
+	if (dcb.fOutX && 							
+		// Enable XON/XOFF for receiving
+		dcb.fInX)
+	{
+		//RequestToSendXOnXOff
+		return 3;
+	}
+	//hardware flow control is used.
+	return 2;
+#else
+	struct termios options;
+	    // Get the current options for the serial port.
+	    int ret = tcgetattr(hComPort, &options);
+		if (ret < 0)
+		{
+			ReportError(env, "Failed to get settings for serial port.");
+		}
+		// Disable DTR monitoring
+		if ((options.c_cflag & CRTSCTS) == 0)
+		{
+			if ((options.c_iflag &  (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
+			{
+				//XOnXOff
+				return 1;
+			}
+			//None
+			return 0;
+		}
+		if ((options.c_iflag &  (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
+		{
+			//RequestToSendXOnXOff
+			return 3;
+		}
+		//hardware flow control is used.
+		return 2;
+#endif
+
+}
+
+JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setHandshake(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
+{	
+#if defined(_WINDOWS)
+	DCB dcb;
+	int ret;
+	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
+	{
+		ReportError(env, ret);
+	}
+	//None
+	if (value == 0)
+	{
+		dcb.fDtrControl = DTR_CONTROL_DISABLE;
+		// Disable RTS (Ready To Send)
+		dcb.fRtsControl = DTR_CONTROL_DISABLE;
+		dcb.fOutX = dcb.fInX = 0;
+	}
+	//XOnXOff
+	else if (value == 1)
+	{
+		dcb.fDtrControl = DTR_CONTROL_DISABLE;
+		// Disable RTS (Ready To Send)
+		dcb.fRtsControl = DTR_CONTROL_DISABLE;
+		dcb.fOutX = dcb.fInX = 1;
+
+	}
+	//hardware flow control is used.
+	else if (value == 2)
+	{
+		dcb.fDtrControl = DTR_CONTROL_ENABLE;
+		// Disable RTS (Ready To Send)
+		dcb.fRtsControl = DTR_CONTROL_ENABLE;
+		dcb.fOutX = dcb.fInX = 0;
+	}
+	//RequestToSendXOnXOff
+	else if (value == 3)
+	{
+		dcb.fDtrControl = DTR_CONTROL_ENABLE;
+		// Disable RTS (Ready To Send)
+		dcb.fRtsControl = DTR_CONTROL_ENABLE;
+		dcb.fOutX = dcb.fInX = 1;
+	}
+	if ((ret = GXSetCommState((HANDLE) hComPort, &dcb)) != 0)	
+	{
+		ReportError(env, ret);
+	}
+#else
+	struct termios options;
+	// Get the current options for the serial port.
+	int ret = tcgetattr(hComPort, &options);
+	if (ret < 0)
+	{
+		ReportError(env, "Failed to get settings for serial port.");
+	}
+	//None
+	if (value == 0)
+	{
+		options.c_cflag &= ~CRTSCTS;       // no flow control
+		options.c_iflag &=  ~(IXON | IXOFF | IXANY);// turn off s/w flow control.
+	}
+	//XOnXOff
+	else if (value == 1)
+	{
+		options.c_cflag &= ~CRTSCTS;       // no flow control
+		options.c_iflag |=  (IXON | IXOFF | IXANY);// turn s/w flow control On.
+
+	}
+	//hardware flow control is used.
+	else if (value == 2)
+	{
+		options.c_cflag |= CRTSCTS;       // flow control is used.
+		options.c_iflag &=  ~(IXON | IXOFF | IXANY);// turn off s/w flow ctcontrolrl
+	}
+	//RequestToSendXOnXOff
+	else if (value == 3)
+	{
+		options.c_cflag |= CRTSCTS;       // flow control is used.
+		options.c_iflag |=  (IXON | IXOFF | IXANY);// turn s/w flow control On.
+	}
+	if (tcsetattr(hComPort, TCSANOW, &options) != 0)
+	{
+		ReportError(env, "tcsetattr failed.");
+	}
+#endif
+
 }

@@ -44,6 +44,7 @@ import java.util.List;
 */
 public class GXSerial implements IGXMedia
 {   
+    long m_Closing = 0;
     int m_WriteTimeout;
     int m_ReadTimeout;
     private static boolean Initialized;
@@ -254,7 +255,9 @@ public class GXSerial implements IGXMedia
                 }
                 notifyTrace(new TraceEventArgs(TraceTypes.INFO, "Settings: Port: " + this.getPortName() + " Baud Rate: " + getBaudRate() + " Data Bits: " + (new Integer(getDataBits())).toString() + " Parity: " + getParity().toString() + " Stop Bits: " + getStopBits().toString() + " Eop:" + eop));
             }             
-            m_hWnd = NativeCode.openSerialPort(m_PortName);
+            long tmp[] = new long[1];
+            m_hWnd = NativeCode.openSerialPort(m_PortName, tmp);            
+            m_Closing = tmp[0];
             setRtsEnable(true);
             setDtrEnable(true);
             Receiver = new GXReceiveThread(this, m_hWnd);
@@ -275,12 +278,14 @@ public class GXSerial implements IGXMedia
     public final void close()
     {       
         if (m_hWnd != 0)
-        {         
+        {    
+            /*
             if (Receiver != null)
             {
                 Receiver.interrupt();                    
                 Receiver = null;
-            }            
+            } 
+            * */
             try
             {
                 NotifyMediaStateChange(MediaState.CLOSING);
@@ -294,7 +299,7 @@ public class GXSerial implements IGXMedia
             {
                 try
                 {
-                    NativeCode.closeSerialPort(m_hWnd);
+                    NativeCode.closeSerialPort(m_hWnd, m_Closing);
                 }
                 catch (java.lang.Exception e)
                 {
@@ -415,9 +420,9 @@ public class GXSerial implements IGXMedia
         {
             boolean change;
             change = getDtrEnable() != value;
+            NativeCode.setDtrEnable(m_hWnd, value);
             if (change)
-            {
-                NativeCode.setDtrEnable(m_hWnd, value);
+            {                
                 NotifyPropertyChanged("DtrEnable");
             }
         }
@@ -535,9 +540,9 @@ public class GXSerial implements IGXMedia
     {
         boolean change;
         change = getRtsEnable() != value;
+        NativeCode.setRtsEnable(m_hWnd, value);
         if (change)
-        {
-            NativeCode.setRtsEnable(m_hWnd, value);
+        {            
             NotifyPropertyChanged("RtsEnable");
         }
     }

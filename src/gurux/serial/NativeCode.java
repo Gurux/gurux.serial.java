@@ -37,9 +37,9 @@ package gurux.serial;
 public class NativeCode {
     public static native String[] getPortNames();   
     
-    public static native int openSerialPort(String port);   
+    public static native int openSerialPort(String port, long[] closing);   
         
-    public static native void closeSerialPort(long hComPort);   
+    public static native void closeSerialPort(long hComPort, long closing);   
     
     public static native int getBaudRate(long hComPort);        
     
@@ -75,7 +75,7 @@ public class NativeCode {
 
     public static native int getBytesToWrite(long hComPort);
         
-    public static native byte[] read(long hComPort, int readTimeout);  
+    public static native byte[] read(long hComPort, int readTimeout, long closing);  
     
     public static native void write(long hComPort, byte[] data, int writeTimeout);
     
