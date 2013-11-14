@@ -71,7 +71,7 @@ public:
 	// TODO: add your methods here.
 };
 
-LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, BOOL bShowAll = TRUE);
+LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bShowAll = true);
 
 int GXGetCommState(HANDLE hWnd, LPDCB DCB);
 
@@ -93,76 +93,76 @@ void ReportError(JNIEnv* env, const char* pError)
 }
 
 extern "C"
-JNIEXPORT jobjectArray JNICALL Java_gurux_serial_NativeCode_getPortNames(JNIEnv* env, jclass clazz);
+JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env, jclass clazz);
 
 extern "C"
-JNIEXPORT jlong JNICALL Java_gurux_serial_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing);
+JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort, jlong closing);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_closeSerialPort(JNIEnv* env, jclass clazz, jlong hComPort, jlong closing);
 
 extern "C"
-JNIEXPORT jbyteArray JNICALL Java_gurux_serial_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing);
+JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_write(JNIEnv* env, jclass clazz, jlong hComPort, jbyteArray data, jint writeTimeout);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_write(JNIEnv* env, jclass clazz, jlong hComPort, jbyteArray data, jint writeTimeout);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBaudRate(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setBaudRate(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBaudRate(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getDataBits(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setDataBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDataBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getParity(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getParity(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setParity(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setParity(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getStopBits(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getStopBits(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setStopBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setStopBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setBreakState(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBreakState(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
 
 extern "C"
-JNIEXPORT jboolean JNICALL Java_gurux_serial_NativeCode_getRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
 
 extern "C"
-JNIEXPORT jboolean JNICALL Java_gurux_serial_NativeCode_getDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value);
 
 extern "C"
-JNIEXPORT jboolean JNICALL Java_gurux_serial_NativeCode_getDsrHolding(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDsrHolding(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT jboolean JNICALL Java_gurux_serial_NativeCode_getCtsHolding(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getCtsHolding(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBytesToRead(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToRead(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getBytesToWrite(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToWrite(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getCDHolding(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getCDHolding(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT jint JNICALL Java_gurux_serial_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort);
+JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort);
 
 extern "C"
-JNIEXPORT void JNICALL Java_gurux_serial_NativeCode_setHandshake(JNIEnv* env, jclass clazz, jlong hComPort, jint value);
+JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setHandshake(JNIEnv* env, jclass clazz, jlong hComPort, jint value);

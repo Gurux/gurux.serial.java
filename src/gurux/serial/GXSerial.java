@@ -34,6 +34,10 @@
 
 package gurux.serial;
 
+import gurux.io.StopBits;
+import gurux.io.NativeCode;
+import gurux.io.Parity;
+import gurux.io.Handshake;
 import gurux.common.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +48,19 @@ import java.util.List;
 */
 public class GXSerial implements IGXMedia
 {   
+    //Values are saved if port is not open and user try to set them.
+    int m_BaudRate = 9600;
+    int m_DataBits = 8;    
+    StopBits m_StopBits = StopBits.ONE;
+    Parity m_Parity = Parity.NONE;
+    
     long m_Closing = 0;
     int m_WriteTimeout;
     int m_ReadTimeout;
     private static boolean Initialized;
     int m_ReadBufferSize;
     GXReceiveThread Receiver;
-    int m_hWnd;
-    Parity m_Parity;
-    int m_DataBits;    
+    int m_hWnd;        
     String m_PortName;    
     GXSynchronousMediaBase m_syncBase;
     public long m_BytesReceived = 0;
@@ -69,9 +77,8 @@ public class GXSerial implements IGXMedia
     public GXSerial()
     {   
         initialize();
-        m_ReadBufferSize = 256;
-        m_DataBits = 8;
-        m_syncBase = new GXSynchronousMediaBase(1024);
+        m_ReadBufferSize = 256;        
+        m_syncBase = new GXSynchronousMediaBase(m_ReadBufferSize);
         setConfigurableSettings(AvailableMediaSettings.All.getValue());
     }
     
@@ -186,7 +193,7 @@ public class GXSerial implements IGXMedia
      No reply from the receiver, whether or not the operation was successful, is expected.
 
      @param data Data to send to the device.
-     @param receiver IP address of the receiver (optional).
+     @param receiver Not used.
      Reply data is received through OnReceived event.<br/>     		
      @see OnReceived OnReceived
      @see Open Open
@@ -256,7 +263,24 @@ public class GXSerial implements IGXMedia
                 notifyTrace(new TraceEventArgs(TraceTypes.INFO, "Settings: Port: " + this.getPortName() + " Baud Rate: " + getBaudRate() + " Data Bits: " + (new Integer(getDataBits())).toString() + " Parity: " + getParity().toString() + " Stop Bits: " + getStopBits().toString() + " Eop:" + eop));
             }             
             long tmp[] = new long[1];
-            m_hWnd = NativeCode.openSerialPort(m_PortName, tmp);            
+            m_hWnd = NativeCode.openSerialPort(m_PortName, tmp); 
+            //If user has change values before open.
+            if (m_BaudRate != 9600)
+            {
+                setBaudRate(m_BaudRate);
+            }
+            if (m_DataBits != 8)
+            {
+                setDataBits(m_DataBits);
+            }
+            if (m_Parity != Parity.NONE)
+            {
+                setParity(m_Parity);
+            }
+            if (m_StopBits != StopBits.ONE)
+            {
+                setStopBits(m_StopBits);
+            }
             m_Closing = tmp[0];
             setRtsEnable(true);
             setDtrEnable(true);
@@ -279,13 +303,11 @@ public class GXSerial implements IGXMedia
     {       
         if (m_hWnd != 0)
         {    
-            /*
             if (Receiver != null)
             {
                 Receiver.interrupt();                    
                 Receiver = null;
             } 
-            * */
             try
             {
                 NotifyMediaStateChange(MediaState.CLOSING);
@@ -320,6 +342,10 @@ public class GXSerial implements IGXMedia
   */ 
     public final int getBaudRate()
     {
+        if (m_hWnd == 0)
+        {
+            return m_BaudRate;        
+        }
         return NativeCode.getBaudRate(m_hWnd);
     }
     public final void setBaudRate(int value)
@@ -327,7 +353,14 @@ public class GXSerial implements IGXMedia
         boolean change = getBaudRate() != value;            
         if (change)
         {
-            NativeCode.setBaudRate(m_hWnd, value);
+            if (m_hWnd == 0)
+            {
+                m_BaudRate = value;        
+            }
+            else
+            {
+                NativeCode.setBaudRate(m_hWnd, value);
+            }
             NotifyPropertyChanged("BaudRate");
         }
     }
@@ -387,6 +420,10 @@ public class GXSerial implements IGXMedia
      */
     public final int getDataBits()
     {
+        if (m_hWnd == 0)
+        {
+            return m_DataBits;
+        }
         return NativeCode.getDataBits(m_hWnd);
     }
 
@@ -396,10 +433,17 @@ public class GXSerial implements IGXMedia
         change = getDataBits() != value;        
         if (change)
         {
-            NativeCode.setDataBits(m_hWnd, value);
+            if (m_hWnd == 0)
+            {
+                m_DataBits = value;
+            }
+            else
+            {
+                NativeCode.setDataBits(m_hWnd, value);
+            }
             NotifyPropertyChanged("DataBits");
         }
-}
+    }
         /** 
          Gets the state of the Data Set Ready (DSR) signal.
         */
@@ -460,6 +504,10 @@ public class GXSerial implements IGXMedia
      */
     public final Parity getParity()
     {
+        if (m_hWnd == 0)
+        {
+            return m_Parity;
+        }
         return Parity.values()[NativeCode.getParity(m_hWnd)];
     }
 
@@ -469,7 +517,14 @@ public class GXSerial implements IGXMedia
         change = getParity() != value;        
         if (change)
         {
-            NativeCode.setParity(m_hWnd, value.ordinal());
+            if (m_hWnd == 0)
+            {
+                m_Parity = value;
+            }
+            else
+            {
+                NativeCode.setParity(m_hWnd, value.ordinal());
+            }
             NotifyPropertyChanged("Parity");
         }
     }
@@ -552,6 +607,10 @@ public class GXSerial implements IGXMedia
     */
     public final StopBits getStopBits()
     {
+        if (m_hWnd == 0)
+        {
+            return m_StopBits;
+        }
         return StopBits.values()[NativeCode.getStopBits(m_hWnd)];
     }
     public final void setStopBits(StopBits value)
@@ -560,7 +619,14 @@ public class GXSerial implements IGXMedia
         change = getStopBits() != value;
         if (change)
         {
-            NativeCode.setStopBits(m_hWnd, value.ordinal());
+            if (m_hWnd == 0)
+            {
+                m_StopBits = value;
+            }
+            else
+            {
+                NativeCode.setStopBits(m_hWnd, value.ordinal());
+            }
             NotifyPropertyChanged("StopBits");
         }
     }

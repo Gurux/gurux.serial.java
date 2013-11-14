@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
+ FILEVERSION 1,0,0,2
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Gurux Ltd."
             VALUE "FileDescription", "Gurux serial port component for Java."
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1, 0, 0, 2"
             VALUE "InternalName", "gurux.serial"
             VALUE "LegalCopyright", "Copyright (C) Gurux Ltd. 2013"
             VALUE "OriginalFilename", "gurux.serial.java"

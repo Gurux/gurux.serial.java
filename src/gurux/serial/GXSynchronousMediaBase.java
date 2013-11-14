@@ -35,6 +35,7 @@
 package gurux.serial;
 
 import gurux.common.ReceiveParameters;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
@@ -66,6 +67,19 @@ class GXSynchronousMediaBase
             b = java.nio.ByteBuffer.allocate(4);
             b.putInt(((Number)data).intValue());
             return b.array();
+        }
+        if (data instanceof String)
+        {
+            try 
+            {
+                String str = (String)data;
+                b = java.nio.ByteBuffer.wrap(str.getBytes("ASCII"));
+                return b.array();
+            }
+            catch (UnsupportedEncodingException ex) 
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
         }
         throw new RuntimeException("Unknown data type " + 
                 data.getClass().getName());

@@ -34,7 +34,7 @@
 
 package gurux.serial;
 
-public class AutoResetEvent
+class AutoResetEvent
 {
     private final Object monitor = new Object();
     private volatile boolean isOpen = false;

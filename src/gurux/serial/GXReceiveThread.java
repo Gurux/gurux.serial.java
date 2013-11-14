@@ -34,6 +34,7 @@
 
 package gurux.serial;
 
+import gurux.io.NativeCode;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceLevel;
 import gurux.common.TraceTypes;
@@ -173,7 +174,7 @@ class GXReceiveThread extends Thread
             {   
                 byte[] buff = NativeCode.read(this.ComPort, m_Parent.m_ReadTimeout, m_Parent.m_Closing);
                 //If connection is closed.
-                if (buff.length == 0)
+                if (buff.length == 0 && Thread.currentThread().isInterrupted())
                 {
                     m_Parent.m_Closing = 0;
                     break;                	
