@@ -101,6 +101,14 @@ public class GXSerial implements IGXMedia
         initialize();
         return NativeCode.getPortNames();
     }
+    
+    /*
+     * Get baud rates supported by given serial port.
+     */
+    public static int[] getAvailableBaudRates(String portName)
+    {                
+        return new int[]{300, 600, 1800, 2400, 4800, 9600, 19200, 38400};
+    }
 
     
     /** 
@@ -180,6 +188,18 @@ public class GXSerial implements IGXMedia
         this.ConfigurableSettings = value;
     }
 
+    /*
+     * Show media properties.
+     */
+    @Override 
+    public boolean properties(javax.swing.JFrame parent)
+    {
+        GXSettings dlg = new GXSettings(parent, true, this);
+        dlg.pack();
+        dlg.setVisible(true);    
+        return dlg.Accepted;
+    }
+    
     /**    
      Displays the copyright of the control, user license, and version information, in a dialog box. 
     */
@@ -241,10 +261,14 @@ public class GXSerial implements IGXMedia
     */
     @Override    
     public final void open() throws Exception
-    {
+    {        
         close();
         try
         {
+            if (m_PortName == null || m_PortName == "")
+            {
+                throw new IllegalArgumentException("Serial port is not selected.");
+            }
             synchronized (m_syncBase.m_ReceivedSync)
             {
                 m_syncBase.m_LastPosition = 0;

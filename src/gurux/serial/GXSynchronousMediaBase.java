@@ -319,8 +319,13 @@ class GXSynchronousMediaBase
                         if (args.getEop() instanceof Array)
                         {
                             for (Object it : (Object[]) args.getEop())
-                            {                                
-                                nFound = indexOf(m_Received, getAsByteArray(it), index, m_ReceivedSize);
+                            {           
+                                byte[] term = getAsByteArray(it);
+                                if (term.length != 1 && m_ReceivedSize - index < term.length)
+                                {
+                                    index = m_ReceivedSize - term.length;
+                                }
+                                nFound = indexOf(m_Received, term, index, m_ReceivedSize);
                                 if (nFound != -1)
                                 {
                                     break;
@@ -329,12 +334,16 @@ class GXSynchronousMediaBase
                         }
                         else
                         {
+                            if (terminator.length != 1 && m_ReceivedSize - index < terminator.length)
+                            {
+                                index = m_ReceivedSize - terminator.length;
+                            }
                             nFound = indexOf(m_Received, terminator, index, m_ReceivedSize);
                         }
                         m_LastPosition = m_ReceivedSize;
                         if (nFound != -1)
                         {
-                            ++nFound;
+                            nFound += terminator.length;
                         }
                 }
             }
