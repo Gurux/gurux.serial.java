@@ -35,7 +35,7 @@
 #include <string.h>
 #include "gurux.serial.h"
 
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bShowAll)
 {
     HKEY hKey;
@@ -345,7 +345,7 @@ printf("received SIGIO signal.\n");
 JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing)
 {
 	jboolean isCopy;
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	const char* pPort = env->GetStringUTFChars(port, &isCopy);
 	std::string port2(pPort);
 	std::string buff("\\\\.\\");
@@ -439,7 +439,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_closeSerialPort(JNIEnv* env, jcl
 {	
 	if (hComPort != 0)
 	{
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	::SetEvent((HANDLE) closing); 	
 	if (!CloseHandle((HANDLE) hComPort))
 	{
@@ -455,27 +455,10 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_closeSerialPort(JNIEnv* env, jcl
 	}
 }
 
-static std::string toHex(unsigned char* pBytes, int len)
-{
-	const char hexArray[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	char* hexChars = new char[len * 3];
-	int tmp;
-	for (int pos = 0; pos != len; ++pos)
-	{
-		tmp = pBytes[pos] & 0xFF;
-		hexChars[pos * 3] = hexArray[tmp >> 4];
-		hexChars[pos * 3 + 1] = hexArray[tmp & 0x0F];
-		hexChars[pos * 3 + 2] = ' ';
-	}
-	std::string str(hexChars);
-	delete hexChars;
-	return str;
-}
-
 JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing)
 {
 	int readBufferSize = 1;
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	if (readTimeout < 1)
 	{
 		readTimeout = INFINITE;
@@ -592,12 +575,6 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass c
 				ReportError(env, buff);
 			}
 		}
-		/*
-		else if (ret != 0)
-		{
-			printf(": %s\r\n", toHex(pBuff, ret).c_str());
-		}
-		*/
     }
     while(ret == 0);
 	jbyteArray data = env->NewByteArray(ret);
@@ -610,7 +587,7 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass c
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_write(JNIEnv* env, jclass clazz, jlong hComPort, jbyteArray data, jint writeTimeout)
 {
 	int len = env->GetArrayLength(data);
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	if (len != 0)
 	{
 		if (writeTimeout < 1)
@@ -664,7 +641,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_write(JNIEnv* env, jclass clazz,
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -721,7 +698,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass 
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBaudRate(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -806,7 +783,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBaudRate(JNIEnv* env, jclass 
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -849,7 +826,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass 
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDataBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -895,7 +872,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDataBits(JNIEnv* env, jclass 
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getParity(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -928,7 +905,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getParity(JNIEnv* env, jclass cl
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setParity(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -981,7 +958,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setParity(JNIEnv* env, jclass cl
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getStopBits(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -1012,7 +989,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getStopBits(JNIEnv* env, jclass 
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setStopBits(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -1054,7 +1031,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setStopBits(JNIEnv* env, jclass 
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBreakState(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	if (value)
 	{
 		if (!SetCommBreak((HANDLE) hComPort))
@@ -1092,7 +1069,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBreakState(JNIEnv* env, jclas
 
 JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort)
 {	
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -1113,7 +1090,7 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getRtsEnable(JNIEnv* env, jc
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	DWORD tmp;
 	if (value)
 	{
@@ -1153,7 +1130,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setRtsEnable(JNIEnv* env, jclass
 
 JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	int ret;
 	DCB dcb;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -1170,7 +1147,7 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDtrEnable(JNIEnv* env, jc
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort, jboolean value)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	DWORD tmp;
 	if (value)
 	{
@@ -1209,7 +1186,7 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDtrEnable(JNIEnv* env, jclass
 
 JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDsrHolding(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	COMSTAT comstat;
 	unsigned long RecieveErrors;
 	if (!ClearCommError((HANDLE) hComPort, &RecieveErrors, &comstat))
@@ -1230,7 +1207,7 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDsrHolding(JNIEnv* env, j
 
 JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getCtsHolding(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	COMSTAT comstat;
 	unsigned long RecieveErrors;
 	if (!ClearCommError((HANDLE) hComPort, &RecieveErrors, &comstat))
@@ -1251,7 +1228,7 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getCtsHolding(JNIEnv* env, j
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToRead(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	COMSTAT comstat;
 	unsigned long RecieveErrors;
 	if (!ClearCommError((HANDLE) hComPort, &RecieveErrors, &comstat))
@@ -1272,7 +1249,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToRead(JNIEnv* env, jcla
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToWrite(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	COMSTAT comstat;
 	unsigned long RecieveErrors;
 	if (!ClearCommError((HANDLE) hComPort, &RecieveErrors, &comstat))
@@ -1297,7 +1274,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToWrite(JNIEnv* env, jcl
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getCDHolding(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	DWORD status = 0;
 	if (!GetCommModemStatus((HANDLE) hComPort, &status))
 	{
@@ -1317,7 +1294,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getCDHolding(JNIEnv* env, jclass
 
 JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort)
 {
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	DCB dcb;
 	int ret;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	
@@ -1383,7 +1360,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass
 
 JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setHandshake(JNIEnv* env, jclass clazz, jlong hComPort, jint value)
 {	
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 	DCB dcb;
 	int ret;
 	if ((ret = GXGetCommState((HANDLE) hComPort, &dcb)) != 0)	

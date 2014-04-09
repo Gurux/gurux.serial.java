@@ -242,7 +242,7 @@ class GXSynchronousMediaBase
         int nFound = -1;
         int LastBuffSize = 0;
         java.util.Calendar calendar = java.util.Calendar.getInstance();
-        java.util.Date StartTime = calendar.getTime();
+        long StartTime = calendar.getTime().getTime();
         boolean retValue = true;
         do
         {
@@ -258,8 +258,7 @@ class GXSynchronousMediaBase
             }
             if (waitTime != -1)
             {
-                waitTime -= calendar.getTime().getTime() - StartTime.getTime();
-                StartTime = new java.util.Date();
+                waitTime = (int) (args.getWaitTime() - (StartTime - calendar.getTime().getTime()));
                 if (waitTime < 0)
                 {
                     waitTime = 0;
@@ -277,7 +276,7 @@ class GXSynchronousMediaBase
                 {
                     received = m_ReceivedEvent.waitOne();
                 }
-                else
+                else if (waitTime != 0)
                 {
                     received = m_ReceivedEvent.waitOne(waitTime);
                 }
@@ -353,28 +352,31 @@ class GXSynchronousMediaBase
         {
             nFound = args.getCount();
         }
-        Object data;
+        Object data = null;
         synchronized (m_ReceivedSync)
         {
             if (args.getAllData()) //If all data is copied.
             {
                 nFound = m_ReceivedSize;
             }
-            //Convert bytes to object.
-            byte[] tmp = new byte[nFound];
-            System.arraycopy(m_Received, 0, tmp, 0, nFound);
-            int[] readBytes = new int[1]; 
-            data = byteArrayToObject(tmp, args.getReplyType(), readBytes);
-            //Remove read data.
-            m_ReceivedSize -= nFound;
-            //Received size can go less than zero if we have received data and we try to read more.
-            if (m_ReceivedSize < 0)
+            if (nFound != 0)
             {
-                m_ReceivedSize = 0;
-            }
-            if (m_ReceivedSize != 0)
-            {
-                System.arraycopy(m_Received, nFound, m_Received, 0, m_ReceivedSize);
+                //Convert bytes to object.
+                byte[] tmp = new byte[nFound];
+                System.arraycopy(m_Received, 0, tmp, 0, nFound);
+                int[] readBytes = new int[1]; 
+                data = byteArrayToObject(tmp, args.getReplyType(), readBytes);
+                //Remove read data.
+                m_ReceivedSize -= nFound;
+                //Received size can go less than zero if we have received data and we try to read more.
+                if (m_ReceivedSize < 0)
+                {
+                    m_ReceivedSize = 0;
+                }
+                if (m_ReceivedSize != 0)
+                {
+                    System.arraycopy(m_Received, nFound, m_Received, 0, m_ReceivedSize);
+                }
             }
         }
         //Reset count after read.

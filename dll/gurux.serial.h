@@ -39,7 +39,7 @@ using namespace std;
 
 #include "targetver.h"
 // Windows Header Files:
-#ifdef _WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 //Linux headers.
 #else
@@ -58,7 +58,7 @@ using namespace std;
 #include <jni.h>
 #include <vector>
 
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 #ifdef GURUXSERIAL_EXPORTS
 #define GURUXSERIAL_API __declspec(dllexport)
 #else
