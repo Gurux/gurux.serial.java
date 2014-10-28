@@ -61,6 +61,14 @@ class GXReceiveThread extends Thread
         int len = Buffer.length;
         if (len == 0)
         {
+            try
+            {
+                Thread.sleep(200);
+            }
+            catch(Exception Ex)
+            {
+                return;
+            }
             return;
         }
         m_Parent.m_BytesReceived += len;
