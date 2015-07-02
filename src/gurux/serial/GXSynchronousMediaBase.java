@@ -400,19 +400,18 @@ class GXSynchronousMediaBase
             {
                 byte[] oldArray = (byte[])args.getReply();
                 byte[] newArray = (byte[]) data;
-                if (newArray == null)
+                if (newArray != null)
                 {
-                    throw new IllegalArgumentException();
+                    oldReplySize = Array.getLength(oldArray);
+                    int len = oldReplySize + Array.getLength(newArray);
+                    byte[] arr = new byte[len];
+                    //Copy old values.
+                    System.arraycopy((byte[]) args.getReply(), 0, arr, 0, Array.getLength(oldArray));
+                    //Copy new values.
+                    System.arraycopy(newArray, 0, arr, Array.getLength(oldArray), Array.getLength(newArray));
+                    Object tmp2 = arr;
+                    args.setReply((T)tmp2);
                 }
-                oldReplySize = Array.getLength(oldArray);
-                int len = oldReplySize + Array.getLength(newArray);
-                byte[] arr = new byte[len];
-                //Copy old values.
-                System.arraycopy((byte[]) args.getReply(), 0, arr, 0, Array.getLength(oldArray));
-                //Copy new values.
-                System.arraycopy(newArray, 0, arr, Array.getLength(oldArray), Array.getLength(newArray));
-                Object tmp2 = arr;
-                args.setReply((T)tmp2);
             }
             else
             {

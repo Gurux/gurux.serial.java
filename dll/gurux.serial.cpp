@@ -120,7 +120,7 @@ int GXGetCommState(HANDLE hWnd, LPDCB DCB)
 	DCB->DCBlength = sizeof(DCB);
 	if (!GetCommState(hWnd, DCB))
 	{
-		DWORD err = GetLastError(); //Save occured error.
+		DWORD err = GetLastError(); //Save occurred error.
 		if (err == 995)
 		{
 			COMSTAT comstat;
@@ -131,7 +131,7 @@ int GXGetCommState(HANDLE hWnd, LPDCB DCB)
 			}
 			if (!GetCommState(hWnd, DCB))
 			{
-				return GetLastError(); //Save occured error.
+				return GetLastError(); //Save occurred error.
 			}
 		}
 		else
@@ -150,7 +150,7 @@ int GXSetCommState(HANDLE hWnd, LPDCB DCB)
 {
 	if (!SetCommState(hWnd, DCB))
 	{
-		DWORD err = GetLastError(); //Save occured error.
+		DWORD err = GetLastError(); //Save occurred error.
 		if (err == 995)
 		{
 			COMSTAT comstat;
@@ -662,33 +662,33 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass 
 	ret = cfgetispeed(&options);
 	switch(ret)
 	{
-		case B50:
+		case 50:
 			return 50;
-		case B75:
+		case 75:
 			return 75;
-		case B110:
+		case 110:
 			return 110;
-		case B134:
+		case 134:
 			return 134;
-		case B150:
+		case 150:
 			return 150;
-		case B200:
+		case 200:
 			return 200;
-		case B600:
+		case 600:
 			return 600;
-		case B1200:
+		case 1200:
 			return 1200;
-		case B1800:
+		case 1800:
 			return 1800;
-		case B2400:
+		case 2400:
 			return 2400;
-		case B4800:
+		case 4800:
 			return 4800;
-		case B9600:
+		case 9600:
 			return 9600;
-		case B19200:
+		case 19200:
 			return 19200;
-		case B38400:
+		case 38400:
 			return 38400;
 	}
 	ReportError(env, "Invalid baud rate.");
@@ -721,49 +721,49 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBaudRate(JNIEnv* env, jclass 
 	switch(value)
 	{
 		case 50:
-		   value = B50;
+		   value = 50;
 		break;
 		case 75:
-		   value = B75;
+		   value = 75;
 		break;
 		case 110:
-		   value = B110;
+		   value = 110;
 		break;
 		case 134:
-		   value = B134;
+		   value = 134;
 		break;
 		case 150:
-		   value = B150;
+		   value = 150;
 		break;
 		case 200:
-		   value = B200;
+		   value = 200;
 		break;
 		case 300:
-		   value = B300;
+		   value = 300;
 		break;
 		case 600:
-		   value = B600;
+		   value = 600;
 		break;
 		case 1200:
-		   value = B1200;
+		   value = 1200;
 		break;
 		case 1800:
-		   value = B1800;
+		   value = 1800;
 		break;
 		case 2400:
-		   value = B2400;
+		   value = 2400;
 		break;
-		case B4800:
-		   value = B4800;
+		case 4800:
+		   value = 4800;
 		break;
 		case 9600:
-		   value = B9600;
+		   value = 9600;
 		break;
 		case 19200:
-		   value = B19200;
+		   value = 19200;
 		break;
 		case 38400:
-		   value = B38400;
+		   value = 38400;
 		break;
 		default:
 			ReportError(env, "Invalid value.");

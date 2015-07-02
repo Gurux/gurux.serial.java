@@ -43,13 +43,13 @@ import java.lang.reflect.Array;
 class GXReceiveThread extends Thread
 {     
     long ComPort;
-    private GXSerial m_Parent;   
+    final private GXSerial m_Parent;   
     int BufferPosition = 0;
     Object Eop = null;
 
     public GXReceiveThread(GXSerial parent, long hComPort)
     {        
-        super("GXSerial " + new Long(hComPort).toString());
+        super("GXSerial " + String.valueOf(hComPort));
         ComPort = hComPort;
         m_Parent = parent;       
         Eop = m_Parent.getEop();
@@ -65,8 +65,8 @@ class GXReceiveThread extends Thread
             {
                 Thread.sleep(200);
             }
-            catch(Exception Ex)
-            {
+            catch(Exception ex)
+            {                
                 return;
             }
             return;
