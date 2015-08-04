@@ -186,7 +186,7 @@ void ReportError(JNIEnv* env, DWORD err)
 					 buff,
 					 MAX_PATH - 1,
 					 NULL);
-	jclass exClass = env->FindClass("java/lang/RuntimeException");
+	jclass exClass = env->FindClass("java/lang/Exception");
 	if (exClass == NULL)
 	{
 		env->FatalError(buff);
