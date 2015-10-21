@@ -5,8 +5,8 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>gurux.serial.java</name>
             <source-roots>
+                <root id="src.java.dir" name="Source Packages"/>
                 <root id="src.resources.dir" name="Resources"/>
-                <root id="src.main.dir" name="Source Packages"/>
             </source-roots>
             <test-roots>
                 <root id="test.java.dir" name="Tests"/>

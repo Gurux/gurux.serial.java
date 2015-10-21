@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * Unit test for serial port media.
  */
 public class GXSerialTest extends TestCase {
     /**

@@ -6,7 +6,7 @@
  <packaging>jar</packaging>  
  <name>gurux.serial.java</name>
  <url>http://www.gurux.org</url>
-  <description>gurux.common.java package implements interfaces that are needed for Gurux Media components and Gurux Device Framework. Purpose of Gurux Device Framework is help you to read your devices, meters and sensors easier.</description>
+  <description>gurux.serial.java package is used to communicate with serial port.</description>
   <developers>
     <developer>
         <id>Gurux</id>
