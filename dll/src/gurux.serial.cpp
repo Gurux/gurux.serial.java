@@ -33,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 #include <string.h>
-#include "gurux.serial.h"
+#include "../include/gurux.serial.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bShowAll)
@@ -116,7 +116,6 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bSho
 
 int GXGetCommState(HANDLE hWnd, LPDCB DCB)
 {
-	ZeroMemory(DCB, sizeof(LPDCB));
 	DCB->DCBlength = sizeof(DCB);
 	if (!GetCommState(hWnd, DCB))
 	{
@@ -311,7 +310,7 @@ void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& por
 JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env, jclass clazz)
 {
 	std::vector<std::basic_string<char> > portItems;
-#ifdef _WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	char portname[MAX_PATH];
 	DWORD count = 0;
 	long retCode = 0;	
@@ -322,7 +321,7 @@ JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env
 		portItems.push_back(str);
 	}	
 #else //If Linux
-	GetLinuxSerialPorts(env, portItems);
+//	GetLinuxSerialPorts(env, portItems);
 #endif
 
 	jclass stringClass = env->FindClass("java/lang/String");

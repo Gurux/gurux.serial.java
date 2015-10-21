@@ -32,31 +32,39 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.serial;
-
-/**
- *
- * @author Gurux Ltd
- */
-class GXSync 
+//This is required that application can be build with eclipse.
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+int main()
 {
-    int[] Count;
-    /*
-     * Constructor.
-     */
-    public GXSync(int[] cnt)
-    {
-        Count = cnt;
-        ++Count[0];
-    }
-    
-    /*
-     * Destructor.
-     */
-    @Override
-    protected void finalize() throws Throwable
-    {
-      --Count[0];      
-      super.finalize(); //not necessary if extending Object.
-    }     
+
 }
+
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+					 )
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		{
+		}
+		break;
+	case DLL_THREAD_ATTACH:
+		{
+		}
+		break;
+	case DLL_THREAD_DETACH:
+		{
+		}
+		break;
+	case DLL_PROCESS_DETACH:
+		{
+		}
+		break;		
+	}
+	return TRUE;
+}
+
+#endif

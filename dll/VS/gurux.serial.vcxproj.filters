@@ -15,19 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="..\src\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gurux.serial.cpp">
+    <ClCompile Include="..\src\gurux.serial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="..\include\gurux.serial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gurux.serial.h">
+    <ClInclude Include="..\include\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\include\gurux.serial.java.rc">
+      <Filter>Header Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
