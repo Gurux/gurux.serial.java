@@ -14,19 +14,13 @@ We are updating documentation on Gurux web page.
 
 If you have problems you can ask your questions in Gurux [Forum](http://www.gurux.org/forum).
 
-Before use you must compile gurux.serial.java.dll. It is located in dll folder under gurux.serial.java project or you can download it [here](http://www.gurux.org/Downloads/gurux.serial.java.zip "gurux.serial.java.zip").
-We have build dll for Windows 32, Windows 64 and for 32 bit Linux.
+You can get source codes from http://www.github.com/gurux or if you use Maven add this to your POM-file:
 
-After it is compiled you must copy it to Java Runtime Environment's folder.
-
-For Windows:
-
-For version 1.6.0, this usually is 
-c:\Program Files\Java\jre1.6.0_01 or c:\Program Files x86\Java\jre1.6.0_01
-
-For Linux you can copy it to /lib folder.
-
-After that you can start to use Gurux serial port component.
+<dependency>
+  <groupId>org.gurux</groupId>
+  <artifactId>gurux.serial</artifactId>
+  <version>1.0.3</version>
+</dependency>
 
 Simple example
 =========================== 

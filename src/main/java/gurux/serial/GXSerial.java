@@ -207,7 +207,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
      *            Operating system name.
      * @return True if Windows.
      */
-    static boolean isWindows(String os) {
+    static boolean isWindows(final String os) {
         return (os.indexOf("win") >= 0);
     }
 
@@ -218,7 +218,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
      *            Operating system name.
      * @return True if Mac.
      */
-    static boolean isMac(String os) {
+    static boolean isMac(final String os) {
         return (os.indexOf("mac") >= 0);
     }
 
@@ -229,7 +229,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
      *            Operating system name.
      * @return True if Unix.
      */
-    static boolean isUnix(String os) {
+    static boolean isUnix(final String os) {
         return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0
                 || os.indexOf("aix") >= 0);
     }
@@ -241,7 +241,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
      *            Operating system name.
      * @return True if Solaris.
      */
-    static boolean isSolaris(String os) {
+    static boolean isSolaris(final String os) {
         return (os.indexOf("sunos") >= 0);
     }
 

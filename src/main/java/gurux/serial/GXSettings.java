@@ -145,7 +145,8 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
      * @param comp
      *            Parent component.
      */
-    public GXSettings(java.awt.Frame parent, boolean modal, GXSerial comp) {
+    GXSettings(final java.awt.Frame parent, final boolean modal,
+            final GXSerial comp) {
         super(parent, modal);
         super.setLocationRelativeTo(parent);
         initComponents();
@@ -154,7 +155,9 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         portCB.setModel(new DefaultComboBoxModel<String>(ports));
         int[] rates = GXSerial.getAvailableBaudRates(null);
         baudRate.setModel(new DefaultComboBoxModel<String>(getStrings(rates)));
+        // CHECKSTYLE:OFF
         int[] dataBits = new int[] { 7, 8 };
+        // CHECKSTYLE:ON
         dataBitsCB.setModel(
                 new DefaultComboBoxModel<String>(getStrings(dataBits)));
         String[] parity =
@@ -250,7 +253,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
     /**
      * Initialize settings.
      */
-    // CHECKSTYLE:ON
+    // CHECKSTYLE:OFF
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
@@ -554,7 +557,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
 
         pack();
     }
-    // CHECKSTYLE:OFF
+    // CHECKSTYLE:ON
 
     @Override
     protected JRootPane createRootPane() {

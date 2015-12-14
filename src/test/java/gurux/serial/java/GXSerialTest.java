@@ -10,12 +10,12 @@ import junit.framework.TestSuite;
  */
 public class GXSerialTest extends TestCase {
     /**
-     * Create the test case
+     * Create the test case.
      *
      * @param testName
-     *            name of the test case
+     *            Name of the test case.
      */
-    public GXSerialTest(String testName) {
+    public GXSerialTest(final String testName) {
         super(testName);
     }
 
@@ -29,7 +29,7 @@ public class GXSerialTest extends TestCase {
     /**
      * Test native library load.
      */
-    public void testNativeLibrary() {
+    public final void testNativeLibrary() {
         GXSerial.getPortNames();
     }
 }
