@@ -43,7 +43,8 @@ using namespace std;
 #include <windows.h>
 //Linux headers.
 #else
-#include <string.h> // string function definitions
+#include <string> // string function definitions
+#include <inttypes.h>
 #include <unistd.h> // UNIX standard function definitions
 #include <fcntl.h> // File control definitions
 #include <errno.h> // Error number definitions
@@ -80,16 +81,16 @@ int GXSetCommState(HANDLE hWnd, LPDCB DCB);
 static void ReportError(JNIEnv* env, DWORD err);
 
 #else //LINUX
-
+typedef uint32_t	DWORD;
 static basic_string<char> GetDriver(const basic_string<char>& tty);
 static void GetComPort(const string& dir, vector<basic_string<char> >& ports);
 void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& ports);
-
+//static void ReportError(JNIEnv* env, DWORD err);
 #endif
 
 void ReportError(JNIEnv* env, const char* pError)
 {
-	env->FatalError(pError);	
+	env->FatalError(pError);
 }
 
 extern "C"
