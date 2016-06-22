@@ -18,6 +18,7 @@ local.properties
 nbproject/private/
 doc/
 target/
+development/src/main/resources/.svn/
 
 # External tool builders
 .externalToolBuilders/
