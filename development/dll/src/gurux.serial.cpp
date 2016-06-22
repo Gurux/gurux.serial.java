@@ -33,6 +33,9 @@
 //---------------------------------------------------------------------------
 
 #include <string.h>
+#include <string>
+#include <iostream>
+#include <cstring>
 #include "../include/gurux.serial.h"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -40,21 +43,20 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bSho
 {
     HKEY hKey;
     char ClassName[MAX_PATH] = ""; // Buffer for class name.
-    DWORD dwcClassLen = MAX_PATH; // Length of class string.
-    DWORD dwcSubKeys; // Number of sub keys.
-    DWORD dwcMaxSubKey; // Longest sub key size.
-    DWORD dwcMaxClass; // Longest class string.
-    DWORD dwcValues; // Number of values for this key.
-    char valueName[MAX_PATH] ;
+    DWORD dwcClassLen = MAX_PATH;// Length of class string.
+    DWORD dwcSubKeys;// Number of sub keys.
+    DWORD dwcMaxSubKey;// Longest sub key size.
+    DWORD dwcMaxClass;// Longest class string.
+    DWORD dwcValues;// Number of values for this key.
+    char valueName[MAX_PATH];
     DWORD dwcValueName = MAX_PATH;
-    DWORD dwcMaxValueName; // Longest Value name.
-    DWORD dwcMaxValueData; // Longest Value data.
-    DWORD dwcSecDesc; // Security descriptor.
-    FILETIME ftLastWriteTime; // Last write time.
+    DWORD dwcMaxValueName;// Longest Value name.
+    DWORD dwcMaxValueData;// Longest Value data.
+    DWORD dwcSecDesc;// Security descriptor.
+    FILETIME ftLastWriteTime;// Last write time.
     DWORD dwType;
     DWORD retValue;
     DWORD cbData;
-
 
     // Use RegOpenKeyEx() with the new Registry path to get an open handle
     // to the child key you want to enumerate.
@@ -68,18 +70,18 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bSho
     }
 
     // Get Class name, Value count.
-    RegQueryInfoKey ( hKey, // Key handle.
-                      ClassName, // Buffer for class name.
-                      &dwcClassLen, // Length of class string.
-                      NULL, // Reserved.
-                      &dwcSubKeys, // Number of sub keys.
-                      &dwcMaxSubKey, // Longest sub key size.
-                      &dwcMaxClass, // Longest class string.
-                      &dwcValues, // Number of values for this key.
-                      &dwcMaxValueName, // Longest Value name.
-                      &dwcMaxValueData, // Longest Value data.
-                      &dwcSecDesc, // Security descriptor.
-                      &ftLastWriteTime); // Last write time.
+    RegQueryInfoKey ( hKey,// Key handle.
+                      ClassName,// Buffer for class name.
+                      &dwcClassLen,// Length of class string.
+                      NULL,// Reserved.
+                      &dwcSubKeys,// Number of sub keys.
+                      &dwcMaxSubKey,// Longest sub key size.
+                      &dwcMaxClass,// Longest class string.
+                      &dwcValues,// Number of values for this key.
+                      &dwcMaxValueName,// Longest Value name.
+                      &dwcMaxValueData,// Longest Value data.
+                      &dwcSecDesc,// Security descriptor.
+                      &ftLastWriteTime);// Last write time.
 
     // Enumerate the Key Values
     cbData = maxLen;
@@ -89,7 +91,7 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bSho
     retValue = RegEnumValue(hKey, index, valueName,
                             &dwcValueName, NULL, &dwType,
                             (BYTE*) deviceName, &cbData);
-    RegCloseKey (hKey); // Close the key handle.
+    RegCloseKey (hKey);// Close the key handle.
     if(dwType != REG_SZ || retValue != (DWORD)ERROR_SUCCESS)
     {
         return -2;
@@ -97,19 +99,19 @@ LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bSho
     if(!bShowAll)
     {
         /*
-        CComBSTR tmp = L"\\\\.\\";
-        tmp += deviceName;
-        //Try to open port. Ignore port if it's open failed.
-        HANDLE hComPort = CreateFileW(tmp,
-        			GENERIC_READ | GENERIC_WRITE, 0, //Exclusive access,
-        			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        //Return 1 if port is already opened.
-        if (hComPort == INVALID_HANDLE_VALUE)
-        {
-        	 return 1;
-        }
-        CloseHandle(hComPort);
-        */
+         CComBSTR tmp = L"\\\\.\\";
+         tmp += deviceName;
+         //Try to open port. Ignore port if it's open failed.
+         HANDLE hComPort = CreateFileW(tmp,
+         GENERIC_READ | GENERIC_WRITE, 0, //Exclusive access,
+         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+         //Return 1 if port is already opened.
+         if (hComPort == INVALID_HANDLE_VALUE)
+         {
+         return 1;
+         }
+         CloseHandle(hComPort);
+         */
     }
     return 0;
 }
@@ -197,33 +199,22 @@ void ReportError(JNIEnv* env, DWORD err)
 }
 
 #else
-/*
-#include <termios.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-*/
 
-#include <termios.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
+#include <inttypes.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <fcntl.h>
 #include <linux/serial.h>
-
-#include <stdio.h>
 #include <sys/signal.h>
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-
 
 basic_string<char> GetDriver(const basic_string<char>& tty)
 {
@@ -234,7 +225,7 @@ basic_string<char> GetDriver(const basic_string<char>& tty)
     devicedir += "/device";
 
     // Stat the device dir and handle it if it is a symlink
-    if (lstat(devicedir.c_str(), &st)==0 && S_ISLNK(st.st_mode))
+    if (lstat(devicedir.c_str(), &st) == 0 && S_ISLNK(st.st_mode))
     {
         char buffer[256];
         memset(buffer, 0, sizeof(buffer));
@@ -257,28 +248,27 @@ void GetComPort(const string& dir, vector<basic_string<char> >& ports)
     if (driver.size() > 0)
     {
         string devfile = string("/dev/") + basename(dir.c_str());
-        if (driver == "serial")
+        // any driver will do eg. serial8250 pl2303 cdc_acm ftdi_sio, not just "serial"
+        // Try to open the device
+        int fd = open(devfile.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
+        if (fd >= 0)
         {
-            // Try to open the device
-            int fd = open(devfile.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
-            if (fd >= 0)
+            // Get serial_info
+            if (ioctl(fd, TIOCGSERIAL, &serinfo) == 0)
             {
-                // Get serial_info
-                if (ioctl(fd, TIOCGSERIAL, &serinfo)==0)
+                // If device type is no PORT_UNKNOWN we accept the port
+                if (serinfo.type != PORT_UNKNOWN)
                 {
-                    // If device type is no PORT_UNKNOWN we accept the port
-                    if (serinfo.type != PORT_UNKNOWN)
-                    {
-                        ports.push_back(devfile);
-                    }
+                    ports.push_back(devfile);
                 }
-                close(fd);
             }
+            close(fd);
         }
     }
 }
 
-void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& ports)
+void GetLinuxSerialPorts(JNIEnv* env,
+                         std::vector<std::basic_string<char> >& ports)
 {
     int pos;
     struct dirent **namelist;
@@ -307,7 +297,8 @@ void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& por
 }
 #endif
 
-JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env, jclass clazz)
+JNIEXPORT jobjectArray JNICALL
+Java_gurux_io_NativeCode_getPortNames (JNIEnv* env, jclass clazz)
 {
     std::vector<std::basic_string<char> > portItems;
 #if defined(_WIN32) || defined(_WIN64)
@@ -321,27 +312,31 @@ JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env
         portItems.push_back(str);
     }
 #else //If Linux
-    GetLinuxSerialPorts(env, portItems);
+    GetLinuxSerialPorts (env, portItems);
 #endif
 
-    jclass stringClass = env->FindClass("java/lang/String");
-    jobjectArray ports = env->NewObjectArray((jsize) portItems.size(), stringClass, 0);
+    jclass stringClass = env->FindClass ("java/lang/String");
+    jobjectArray ports = env->NewObjectArray ((jsize) portItems.size (),
+                         stringClass, 0);
     jsize pos = -1;
-    for(std::vector<std::basic_string<char> >::iterator it = portItems.begin(); it != portItems.end(); ++it)
+    for (std::vector<std::basic_string<char> >::iterator it = portItems.begin ();
+            it != portItems.end (); ++it)
     {
-        jobject item = env->NewStringUTF(it->c_str());
-        env->SetObjectArrayElement(ports, ++pos, item);
+        jobject item = env->NewStringUTF (it->c_str ());
+        env->SetObjectArrayElement (ports, ++pos, item);
     }
     return ports;
 }
 
-void signal_handler_IO (int status)
+void signal_handler_IO(int status)
 {
     printf("received SIGIO signal.\n");
 //        wait_flag = FALSE;
 }
 
-JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jclass clazz, jstring port, jlongArray closing)
+JNIEXPORT jlong JNICALL
+Java_gurux_io_NativeCode_openSerialPort (JNIEnv* env, jclass clazz,
+        jstring port, jlongArray closing)
 {
     jboolean isCopy;
 #if defined(_WIN32) || defined(_WIN64)
@@ -358,7 +353,8 @@ JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jcl
     {
         ReportError(env, GetLastError());
     }
-    DCB dcb = {0};
+    DCB dcb =
+    {	0};
     dcb.DCBlength = sizeof(DCB);
     dcb.BaudRate = 9600;
     dcb.fBinary = 1;
@@ -385,37 +381,37 @@ JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jcl
     env->SetLongArrayRegion(closing, 0, 1, &hClosing);
     return (long) hComPort;
 #else //#if defined(__LINUX__)
-    const char* pPort = env->GetStringUTFChars(port, &isCopy);
-    std::string buff(pPort);
-    env->ReleaseStringUTFChars(port, pPort);
+    const char* pPort = env->GetStringUTFChars (port, &isCopy);
+    std::string buff (pPort);
+    env->ReleaseStringUTFChars (port, pPort);
 
     // file description for the serial port
     int hComPort;
     // read/write | not controlling term | don't wait for DCD line signal.
-    hComPort = open(buff.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if(hComPort == -1) // if open is unsuccessful.
+    hComPort = open (buff.c_str (), O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (hComPort == -1)// if open is unsuccessful.
     {
-        buff.insert(0, "Failed to Open port: ");
-        ReportError(env, buff.c_str());
+        buff.insert (0, "Failed to Open port: ");
+        ReportError (env, buff.c_str ());
     }
     else
     {
-        if(!isatty(hComPort))
+        if (!isatty (hComPort))
         {
-            ReportError(env, "Failed to Open port. This is not a serial port.");
+            ReportError (env, "Failed to Open port. This is not a serial port.");
         }
 
-        if ((ioctl(hComPort, TIOCEXCL) == -1))
+        if ((ioctl (hComPort, TIOCEXCL) == -1))
         {
-            ReportError(env, "Failed to Open port. Exclusive access denied.");
+            ReportError (env, "Failed to Open port. Exclusive access denied.");
         }
 
         struct termios options;
-        memset(&options,0,sizeof(options));
-        options.c_iflag=0;
-        options.c_oflag=0;
-        options.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
-        options.c_lflag=0;
+        memset (&options, 0, sizeof(options));
+        options.c_iflag = 0;
+        options.c_oflag = 0;
+        options.c_cflag = CS8 | CREAD | CLOCAL; // 8n1, see termios.h for more information
+        options.c_lflag = 0;
         options.c_cc[VMIN] = 1;
         options.c_cc[VTIME] = 5;
         //Set Baud Rates
@@ -424,9 +420,9 @@ JNIEXPORT jlong JNICALL Java_gurux_io_NativeCode_openSerialPort(JNIEnv* env, jcl
 
         //hardware flow control is used as default.
         //options.c_cflag |= CRTSCTS;
-        if (tcsetattr(hComPort, TCSAFLUSH, &options) != 0)
+        if (tcsetattr (hComPort, TCSAFLUSH, &options) != 0)
         {
-            ReportError(env, "Failed to Open port. tcsetattr failed.");
+            ReportError (env, "Failed to Open port. tcsetattr failed.");
             //errno
         }
     }
@@ -454,7 +450,9 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_closeSerialPort(JNIEnv* env, jcl
     }
 }
 
-JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass clazz, jlong hComPort, jint readTimeout, jlong closing)
+JNIEXPORT jbyteArray JNICALL
+Java_gurux_io_NativeCode_read (JNIEnv* env, jclass clazz, jlong hComPort,
+                               jint readTimeout, jlong closing)
 {
     int readBufferSize = 1;
 #if defined(_WIN32) || defined(_WIN64)
@@ -539,10 +537,10 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass c
     return data;
 #else
     //Get bytes available.
-    int ret = ioctl(hComPort, FIONREAD, &readBufferSize);
+    int ret = ioctl (hComPort, FIONREAD, &readBufferSize);
     if (ret < 0)
     {
-        ReportError(env, "getBytesToRead failed.");
+        ReportError (env, "getBytesToRead failed.");
     }
     //Try to read at least one byte.
     if (readBufferSize == 0)
@@ -552,13 +550,13 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass c
     unsigned char* pBuff = new unsigned char[readBufferSize];
     do
     {
-        ret = read(hComPort, pBuff, readBufferSize);
+        ret = read (hComPort, pBuff, readBufferSize);
         if (ret == -1)
         {
             if (errno == EAGAIN)
             {
                 ret = 0;
-                usleep(100000);
+                usleep (100000);
             }
             //Return empty list if connection is closed.
             else if (errno == EBADF)
@@ -570,14 +568,14 @@ JNIEXPORT jbyteArray JNICALL Java_gurux_io_NativeCode_read(JNIEnv* env, jclass c
             {
                 delete pBuff;
                 char buff[50];
-                sprintf(buff, "Read failed %d", errno);
-                ReportError(env, buff);
+                sprintf (buff, "Read failed %d", errno);
+                ReportError (env, buff);
             }
         }
     }
-    while(ret == 0);
-    jbyteArray data = env->NewByteArray(ret);
-    env->SetByteArrayRegion(data, 0, ret, (jbyte*) pBuff);
+    while (ret == 0);
+    jbyteArray data = env->NewByteArray (ret);
+    env->SetByteArrayRegion (data, 0, ret, (jbyte*) pBuff);
     delete pBuff;
     return data;
 #endif
@@ -638,7 +636,8 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_write(JNIEnv* env, jclass clazz,
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getBaudRate (JNIEnv* env, jclass clazz, jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -651,15 +650,16 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass 
 #else
     struct termios options;
     // Get the current options for the serial port.
-    int ret = tcgetattr(hComPort, &options);
+    int ret = tcgetattr (hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "Failed to get settings for serial port.");
+        ReportError (env, "Failed to get settings for serial port.");
     }
 
     // Get input baud rate.
-    ret = cfgetispeed(&options);
-    switch(ret)
+    ret = cfgetispeed (&options);
+
+    switch (ret)
     {
     case B50:
         return 50;
@@ -667,12 +667,14 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass 
         return 75;
     case B110:
         return 110;
-    case B:
+    case B134:
         return 134;
     case B150:
         return 150;
     case B200:
         return 200;
+    case B300:
+        return 300;
     case B600:
         return 600;
     case B1200:
@@ -689,8 +691,15 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBaudRate(JNIEnv* env, jclass 
         return 19200;
     case B38400:
         return 38400;
+    case B57600:
+        return 57600;
+    case B115200:
+        return 115200;
+    case B230400:
+        return 230400;
+
     }
-    ReportError(env, "Invalid baud rate.");
+    ReportError (env, "Invalid baud rate.");
     return -1;
 #endif
 }
@@ -711,76 +720,93 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBaudRate(JNIEnv* env, jclass 
     }
 #else
     struct termios options;
+    speed_t baudrate = B9600; // sane default init
     // Get the current options for the serial port.
     int ret = tcgetattr(hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "Failed to get settings for serial port.");
+        ReportError(env, "Failed to get settings (tcgetattr) for serial port.");
     }
     switch(value)
     {
     case 50:
-        value = B50;
+        baudrate = B50;
         break;
     case 75:
-        value = B75;
+        baudrate = B75;
         break;
     case 110:
-        value = B110;
+        baudrate = B110;
         break;
     case 134:
-        value = B134;
+        baudrate = B134;
         break;
     case 150:
-        value = B150;
+        baudrate = B150;
         break;
     case 200:
-        value = B200;
+        baudrate = B200;
         break;
     case 300:
-        value = B300;
+        baudrate = B300;
         break;
     case 600:
-        value = B600;
+        baudrate = B600;
         break;
     case 1200:
-        value = B1200;
+        baudrate = B1200;
         break;
     case 1800:
-        value = B1800;
+        baudrate = B1800;
         break;
     case 2400:
-        value = B2400;
+        baudrate = B2400;
         break;
     case 4800:
-        value = B4800;
+        baudrate = B4800;
         break;
     case 9600:
-        value = B9600;
+        baudrate = B9600;
         break;
     case 19200:
-        value = B19200;
+        baudrate = B19200;
         break;
     case 38400:
-        value = B38400;
+        baudrate = B38400;
+        break;
+    case 57600:
+        baudrate = B57600;
+        break;
+    case 115200:
+        baudrate = B115200;
+        break;
+    case 230400:
+        baudrate = B230400;
         break;
     default:
         ReportError(env, "Invalid value.");
     }
 
-    // Set baud rates.
-    cfsetispeed(&options, value);
-    cfsetospeed(&options, value);
+    // Set input baud rate
+    ret = cfsetispeed(&options, baudrate);
+    if (ret < 0)
+        ReportError(env, "Failed to baud rate (cfsetispeed)");
+
+    // set output baud rate
+    ret = cfsetospeed(&options, baudrate);
+    if (ret < 0)
+        ReportError(env, "Failed to baud rate (cfsetospeed)");
+
     // Apply the settings to the serial port.
     ret = tcsetattr(hComPort, TCSANOW, &options);
     if (ret < 0)
-    {
-        ReportError(env, "Failed to set settings for serial port.");
-    }
+        ReportError(env, "Failed to apply settings for serial port. (tcsetattr)");
+
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getDataBits (JNIEnv* env, jclass clazz, jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -793,10 +819,10 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass 
 #else
     struct termios options;
     // Get the current options for the serial port.
-    int ret = tcgetattr(hComPort, &options);
+    int ret = tcgetattr (hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "getDataBits failed.");
+        ReportError (env, "getDataBits failed.");
     }
     // 8-bit chars
     if ((options.c_cflag & CS8) != 0)
@@ -818,7 +844,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getDataBits(JNIEnv* env, jclass 
     {
         return 5;
     }
-    ReportError(env, "getDataBits failed. Unknown value");
+    ReportError (env, "getDataBits failed. Unknown value");
     return -1;
 #endif
 }
@@ -869,7 +895,8 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDataBits(JNIEnv* env, jclass 
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getParity(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getParity (JNIEnv* env, jclass clazz, jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -882,10 +909,10 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getParity(JNIEnv* env, jclass cl
 #else
     struct termios options;
     // Get the current options for the serial port.
-    int ret = tcgetattr(hComPort, &options);
+    int ret = tcgetattr (hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "Failed to get settings for serial port.");
+        ReportError (env, "Failed to get settings for serial port.");
     }
     //Even parity is used.
     if ((options.c_oflag & PARENB) != 0)
@@ -926,24 +953,24 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setParity(JNIEnv* env, jclass cl
     }
     switch ( value)
     {
-    case 0://None: disable parity bit.
+    case 0:    //None: disable parity bit.
         options.c_cflag &= ~PARENB;
         options.c_iflag &= ~INPCK;
         break;
-    case 1: //odd parity
+    case 1://odd parity
         options.c_cflag |= PARENB;
         options.c_cflag |= PARODD;
         options.c_iflag &= ~IGNPAR;
         options.c_iflag |= INPCK;
         break;
-    case 2: //even parity
+    case 2://even parity
         options.c_cflag |= PARENB;
         options.c_cflag &= ~PARODD;
         options.c_iflag &= ~IGNPAR;
         options.c_iflag |= INPCK;
         break;
-    case 3:	//Mark.
-    case 4:	//Space.
+    case 3://Mark.
+    case 4://Space.
         //Use parity but don't test.
         options.c_cflag |= PARENB;
         options.c_iflag |= IGNPAR;
@@ -954,8 +981,8 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setParity(JNIEnv* env, jclass cl
 #endif
 }
 
-
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getStopBits(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getStopBits (JNIEnv* env, jclass clazz, jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -968,10 +995,10 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getStopBits(JNIEnv* env, jclass 
 #else
     struct termios options;
     // Get the current options for the serial port.
-    int ret = tcgetattr(hComPort, &options);
+    int ret = tcgetattr (hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "Failed to get settings for serial port.");
+        ReportError (env, "Failed to get settings for serial port.");
     }
     //One stop bit is used.
     if ((options.c_cflag & CSTOPB) == 0)
@@ -1066,7 +1093,9 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setBreakState(JNIEnv* env, jclas
 #endif
 }
 
-JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getRtsEnable(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jboolean JNICALL
+Java_gurux_io_NativeCode_getRtsEnable (JNIEnv* env, jclass clazz,
+                                       jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -1078,10 +1107,10 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getRtsEnable(JNIEnv* env, jc
     return dcb.fRtsControl == RTS_CONTROL_ENABLE;
 #else
     int status = 0;
-    int ret = ioctl(hComPort, TIOCMGET, &status);
+    int ret = ioctl (hComPort, TIOCMGET, &status);
     if (ret < 0)
     {
-        ReportError(env, "getRtsEnable failed.");
+        ReportError (env, "getRtsEnable failed.");
     }
     return (status & TIOCM_RTS) != 0;
 #endif
@@ -1127,7 +1156,9 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setRtsEnable(JNIEnv* env, jclass
 #endif
 }
 
-JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDtrEnable(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jboolean JNICALL
+Java_gurux_io_NativeCode_getDtrEnable (JNIEnv* env, jclass clazz,
+                                       jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     int ret;
@@ -1139,7 +1170,7 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDtrEnable(JNIEnv* env, jc
     return dcb.fDtrControl == DTR_CONTROL_ENABLE;
 #else
     int status = 0;
-    ioctl(hComPort, TIOCMGET, &status);
+    ioctl (hComPort, TIOCMGET, &status);
     return (status & TIOCM_DTR) != 0;
 #endif
 }
@@ -1183,7 +1214,9 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setDtrEnable(JNIEnv* env, jclass
 #endif
 }
 
-JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDsrHolding(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jboolean JNICALL
+Java_gurux_io_NativeCode_getDsrHolding (JNIEnv* env, jclass clazz,
+                                        jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     COMSTAT comstat;
@@ -1195,16 +1228,18 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getDsrHolding(JNIEnv* env, j
     return comstat.fDsrHold != 0;
 #else
     int status = 0;
-    int ret = ioctl(hComPort, TIOCMGET, &status);
+    int ret = ioctl (hComPort, TIOCMGET, &status);
     if (ret < 0)
     {
-        ReportError(env, "getDsrHolding failed.");
+        ReportError (env, "getDsrHolding failed.");
     }
     return (status & TIOCM_DSR) != 0;
 #endif
 }
 
-JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getCtsHolding(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jboolean JNICALL
+Java_gurux_io_NativeCode_getCtsHolding (JNIEnv* env, jclass clazz,
+                                        jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     COMSTAT comstat;
@@ -1216,16 +1251,18 @@ JNIEXPORT jboolean JNICALL Java_gurux_io_NativeCode_getCtsHolding(JNIEnv* env, j
     return comstat.fCtsHold != 0;
 #else
     int status = 0;
-    int ret = ioctl(hComPort, TIOCMGET, &status);
+    int ret = ioctl (hComPort, TIOCMGET, &status);
     if (ret < 0)
     {
-        ReportError(env, "getCtsHolding failed.");
+        ReportError (env, "getCtsHolding failed.");
     }
     return (status & TIOCM_CTS) != 0;
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToRead(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getBytesToRead (JNIEnv* env, jclass clazz,
+        jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     COMSTAT comstat;
@@ -1237,16 +1274,18 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToRead(JNIEnv* env, jcla
     return comstat.cbInQue;
 #else
     int value = 0;
-    int ret = ioctl(hComPort, FIONREAD, &value);
+    int ret = ioctl (hComPort, FIONREAD, &value);
     if (ret < 0)
     {
-        ReportError(env, "getBytesToRead failed.");
+        ReportError (env, "getBytesToRead failed.");
     }
     return value;
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToWrite(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getBytesToWrite (JNIEnv* env, jclass clazz,
+        jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     COMSTAT comstat;
@@ -1260,18 +1299,20 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getBytesToWrite(JNIEnv* env, jcl
     //There is no FIONWRITE in Linux so return always Zero.
     return 0;
     /*
-    int value = 0;
-    int ret = ioctl(hComPort, FIONWRITE, &value);
-    if (ret < 0)
-    {
-    	ReportError(env, "getBytesToWrite failed in Linux.");
-    }
-    return value;
-    */
+     int value = 0;
+     int ret = ioctl(hComPort, FIONWRITE, &value);
+     if (ret < 0)
+     {
+     ReportError(env, "getBytesToWrite failed in Linux.");
+     }
+     return value;
+     */
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getCDHolding(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getCDHolding (JNIEnv* env, jclass clazz,
+                                       jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     DWORD status = 0;
@@ -1282,16 +1323,18 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getCDHolding(JNIEnv* env, jclass
     return (status & MS_RLSD_ON) != 0;
 #else
     int status = 0;
-    int ret = ioctl(hComPort, TIOCMGET, &status);
+    int ret = ioctl (hComPort, TIOCMGET, &status);
     if (ret < 0)
     {
-        ReportError(env, "getCDHolding failed.");
+        ReportError (env, "getCDHolding failed.");
     }
     return (status & TIOCM_CD) != 0;
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass clazz, jlong hComPort)
+JNIEXPORT jint JNICALL
+Java_gurux_io_NativeCode_getHandshake (JNIEnv* env, jclass clazz,
+                                       jlong hComPort)
 {
 #if defined(_WIN32) || defined(_WIN64)
     DCB dcb;
@@ -1330,15 +1373,15 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass
 #else
     struct termios options;
     // Get the current options for the serial port.
-    int ret = tcgetattr(hComPort, &options);
+    int ret = tcgetattr (hComPort, &options);
     if (ret < 0)
     {
-        ReportError(env, "Failed to get settings for serial port.");
+        ReportError (env, "Failed to get settings for serial port.");
     }
     // Disable DTR monitoring
     if ((options.c_cflag & CRTSCTS) == 0)
     {
-        if ((options.c_iflag &  (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
+        if ((options.c_iflag & (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
         {
             //XOnXOff
             return 1;
@@ -1346,7 +1389,7 @@ JNIEXPORT jint JNICALL Java_gurux_io_NativeCode_getHandshake(JNIEnv* env, jclass
         //None
         return 0;
     }
-    if ((options.c_iflag &  (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
+    if ((options.c_iflag & (IXON | IXOFF | IXANY)) == (IXON | IXOFF | IXANY))
     {
         //RequestToSendXOnXOff
         return 3;
@@ -1415,26 +1458,26 @@ JNIEXPORT void JNICALL Java_gurux_io_NativeCode_setHandshake(JNIEnv* env, jclass
     if (value == 0)
     {
         options.c_cflag &= ~CRTSCTS;       // no flow control
-        options.c_iflag &=  ~(IXON | IXOFF | IXANY);// turn off s/w flow control.
+        options.c_iflag &= ~(IXON | IXOFF | IXANY);// turn off s/w flow control.
     }
     //XOnXOff
     else if (value == 1)
     {
         options.c_cflag &= ~CRTSCTS;       // no flow control
-        options.c_iflag |=  (IXON | IXOFF | IXANY);// turn s/w flow control On.
+        options.c_iflag |= (IXON | IXOFF | IXANY);// turn s/w flow control On.
 
     }
     //hardware flow control is used.
     else if (value == 2)
     {
         options.c_cflag |= CRTSCTS;       // flow control is used.
-        options.c_iflag &=  ~(IXON | IXOFF | IXANY);// turn off s/w flow ctcontrolrl
+        options.c_iflag &= ~(IXON | IXOFF | IXANY);// turn off s/w flow ctcontrolrl
     }
     //RequestToSendXOnXOff
     else if (value == 3)
     {
         options.c_cflag |= CRTSCTS;       // flow control is used.
-        options.c_iflag |=  (IXON | IXOFF | IXANY);// turn s/w flow control On.
+        options.c_iflag |= (IXON | IXOFF | IXANY);// turn s/w flow control On.
     }
     if (tcsetattr(hComPort, TCSANOW, &options) != 0)
     {
