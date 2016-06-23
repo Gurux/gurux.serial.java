@@ -32,4 +32,23 @@ public class GXSerialTest extends TestCase {
     public final void testNativeLibrary() {
         GXSerial.getPortNames();
     }
+
+    /**
+     * Test serial port open.
+     * 
+     * @throws Exception
+     */
+    public final void testOpen() throws Exception {
+        GXSerial serial = new GXSerial();
+        try {
+            serial.setPortName("Gurux");
+            serial.open();
+        } catch (Exception ex) {
+            return;
+        } finally {
+            serial.close();
+        }
+        throw new Exception("Invalid serial port open test failed.");
+
+    }
 }

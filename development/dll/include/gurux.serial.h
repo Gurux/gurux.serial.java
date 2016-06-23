@@ -73,13 +73,23 @@ public:
     // TODO: add your methods here.
 };
 
-LONG EnumerateSerialPorts(char* deviceName, DWORD maxLen, DWORD index, bool bShowAll = true);
+LONG EnumerateSerialPorts(
+    char* deviceName,
+    DWORD maxLen,
+    DWORD index,
+    bool bShowAll = true);
 
-int GXGetCommState(HANDLE hWnd, LPDCB DCB);
+int GXGetCommState(
+    HANDLE hWnd,
+    LPDCB DCB);
 
-int GXSetCommState(HANDLE hWnd, LPDCB DCB);
+int GXSetCommState(
+    HANDLE hWnd,
+    LPDCB DCB);
 
-static void ReportError(JNIEnv* env, unsigned long err);
+static void ReportError(
+    JNIEnv* env,
+    unsigned long err);
 
 #else //LINUX
 static basic_string<char> GetDriver(const basic_string<char>& tty);

@@ -190,19 +190,6 @@ void ReportError(JNIEnv* env, DWORD err)
     ReportError(env, buff);
 }
 
-void ReportError(JNIEnv* env, const char* pError)
-{
-    jclass exClass = env->FindClass("java/lang/Exception");
-    if (exClass == NULL)
-    {
-        env->FatalError(pError);
-    }
-    else
-    {
-        env->ThrowNew(exClass, pError);
-    }
-}
-
 #else
 
 #include <unistd.h>
@@ -301,6 +288,19 @@ void GetLinuxSerialPorts(JNIEnv* env,
     free(namelist);
 }
 #endif
+
+void ReportError(JNIEnv* env, const char* pError)
+{
+    jclass exClass = env->FindClass("java/lang/Exception");
+    if (exClass == NULL)
+    {
+        env->FatalError(pError);
+    }
+    else
+    {
+        env->ThrowNew(exClass, pError);
+    }
+}
 
 JNIEXPORT jobjectArray JNICALL
 Java_gurux_io_NativeCode_getPortNames (JNIEnv* env, jclass clazz)
