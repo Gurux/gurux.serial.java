@@ -79,20 +79,15 @@ int GXGetCommState(HANDLE hWnd, LPDCB DCB);
 
 int GXSetCommState(HANDLE hWnd, LPDCB DCB);
 
-static void ReportError(JNIEnv* env, DWORD err);
+static void ReportError(JNIEnv* env, unsigned long err);
 
 #else //LINUX
-typedef uint32_t	DWORD;
 static basic_string<char> GetDriver(const basic_string<char>& tty);
 static void GetComPort(const string& dir, vector<basic_string<char> >& ports);
 void GetLinuxSerialPorts(JNIEnv* env, std::vector<std::basic_string<char> >& ports);
-//static void ReportError(JNIEnv* env, DWORD err);
 #endif
 
-void ReportError(JNIEnv* env, const char* pError)
-{
-    env->FatalError(pError);
-}
+void ReportError(JNIEnv* env, const char* pError);
 
 extern "C"
 JNIEXPORT jobjectArray JNICALL Java_gurux_io_NativeCode_getPortNames(JNIEnv* env, jclass clazz);

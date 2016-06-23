@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Finnish resources
+// Finnish (Finland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FIN)
-#ifdef _WIN32
 LANGUAGE LANG_FINNISH, SUBLANG_DEFAULT
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -53,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,3
- PRODUCTVERSION 1,0,0,3
+ FILEVERSION 1,0,0,5
+ PRODUCTVERSION 1,0,0,5
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -71,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Gurux Ltd."
             VALUE "FileDescription", "Gurux serial port component for Java."
-            VALUE "FileVersion", "1, 0, 0, 3"
+            VALUE "FileVersion", "1.0.0.5"
             VALUE "InternalName", "gurux.serial"
-            VALUE "LegalCopyright", "Copyright (C) Gurux Ltd. 2013"
+            VALUE "LegalCopyright", "Copyright (C) Gurux Ltd. 2016"
             VALUE "OriginalFilename", "gurux.serial.java"
             VALUE "ProductName", "gurux.serial"
-            VALUE "ProductVersion", "1, 0, 0, 3"
+            VALUE "ProductVersion", "1.0.0.5"
         END
     END
     BLOCK "VarFileInfo"
@@ -85,7 +83,7 @@ BEGIN
     END
 END
 
-#endif    // Finnish resources
+#endif    // Finnish (Finland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

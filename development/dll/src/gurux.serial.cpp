@@ -187,14 +187,19 @@ void ReportError(JNIEnv* env, DWORD err)
                      buff,
                      MAX_PATH - 1,
                      NULL);
+    ReportError(env, buff);
+}
+
+void ReportError(JNIEnv* env, const char* pError)
+{
     jclass exClass = env->FindClass("java/lang/Exception");
     if (exClass == NULL)
     {
-        env->FatalError(buff);
+        env->FatalError(pError);
     }
     else
     {
-        env->ThrowNew(exClass, buff);
+        env->ThrowNew(exClass, pError);
     }
 }
 
