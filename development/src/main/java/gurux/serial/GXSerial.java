@@ -299,7 +299,6 @@ public class GXSerial implements IGXMedia, AutoCloseable {
     }
 
     /**
-     * 
      * Get baud rates supported by given serial port.
      * 
      * @param portName
@@ -528,7 +527,6 @@ public class GXSerial implements IGXMedia, AutoCloseable {
                 hWnd = 0;
                 notifyMediaStateChange(MediaState.CLOSED);
                 bytesSend = 0;
-                receiver.resetBytesReceived();
                 syncBase.resetReceivedSize();
             }
         }
