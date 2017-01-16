@@ -46,7 +46,6 @@ import gurux.io.NativeCode;
  * Receive thread listens serial port and sends received data to the listeners.
  * 
  * @author Gurux Ltd.
- *
  */
 class GXReceiveThread extends Thread {
 
@@ -63,10 +62,6 @@ class GXReceiveThread extends Thread {
      * Parent component where notifies are send.
      */
     private final GXSerial parentMedia;
-    /**
-     * Buffer position.
-     */
-    private int bufferPosition = 0;
 
     /**
      * Amount of bytes received.
@@ -85,7 +80,6 @@ class GXReceiveThread extends Thread {
         super("GXSerial " + String.valueOf(hComPort));
         comPort = hComPort;
         parentMedia = parent;
-        bufferPosition = 0;
     }
 
     /**
@@ -125,24 +119,23 @@ class GXReceiveThread extends Thread {
         if (parentMedia.getIsSynchronous()) {
             gurux.common.TraceEventArgs arg = null;
             synchronized (parentMedia.getSyncBase().getSync()) {
-                parentMedia.getSyncBase().appendData(buffer, bufferPosition,
-                        len);
+                parentMedia.getSyncBase().appendData(buffer, 0, len);
                 // Search End of Packet if given.
                 if (parentMedia.getEop() != null) {
                     if (parentMedia.getEop() instanceof Array) {
                         for (Object eop : (Object[]) parentMedia.getEop()) {
                             totalCount = GXSynchronousMediaBase.indexOf(buffer,
                                     GXSynchronousMediaBase.getAsByteArray(eop),
-                                    bufferPosition - len, bufferPosition);
+                                    0, len);
                             if (totalCount != -1) {
                                 break;
                             }
                         }
                     } else {
                         totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                GXSynchronousMediaBase
-                                        .getAsByteArray(parentMedia.getEop()),
-                                bufferPosition - len, bufferPosition);
+                                GXSynchronousMediaBase.getAsByteArray(
+                                        parentMedia.getEop()),
+                                0, len);
                     }
                 }
                 if (totalCount != -1) {
@@ -158,49 +151,15 @@ class GXReceiveThread extends Thread {
             }
         } else {
             parentMedia.getSyncBase().resetReceivedSize();
-            // Search end of packet if given.
-            if (parentMedia.getEop() != null) {
-                if (parentMedia.getEop() instanceof Array) {
-                    for (Object eop : (Object[]) parentMedia.getEop()) {
-
-                        totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                GXSynchronousMediaBase.getAsByteArray(eop),
-                                bufferPosition - len, bufferPosition);
-                        if (totalCount != -1) {
-                            break;
-                        }
-                    }
-                } else {
-                    totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                            GXSynchronousMediaBase
-                                    .getAsByteArray(parentMedia.getEop()),
-                            bufferPosition - len, bufferPosition);
-                }
-                if (totalCount != -1) {
-                    byte[] data = new byte[len];
-                    System.arraycopy(buffer, 0, data, 0, totalCount);
-                    System.arraycopy(buffer, 0, buffer, totalCount,
-                            bufferPosition - totalCount);
-                    bufferPosition = 0;
-                    ReceiveEventArgs e = new ReceiveEventArgs(data,
-                            parentMedia.getPortName());
-                    parentMedia.notifyReceived(e);
-                    if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
-                        parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
-                                TraceTypes.RECEIVED, buffer, 0, len));
-                    }
-                }
-            } else {
-                byte[] data = new byte[len];
-                System.arraycopy(buffer, 0, data, 0, len);
-                if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
-                    parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
-                            TraceTypes.RECEIVED, data));
-                }
-                ReceiveEventArgs e =
-                        new ReceiveEventArgs(data, parentMedia.getPortName());
-                parentMedia.notifyReceived(e);
+            byte[] data = new byte[len];
+            System.arraycopy(buffer, 0, data, 0, len);
+            if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
+                parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
+                        TraceTypes.RECEIVED, data));
             }
+            ReceiveEventArgs e =
+                    new ReceiveEventArgs(data, parentMedia.getPortName());
+            parentMedia.notifyReceived(e);
         }
     }
 
