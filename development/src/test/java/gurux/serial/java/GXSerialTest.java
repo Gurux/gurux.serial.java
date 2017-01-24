@@ -34,6 +34,8 @@
 
 package gurux.serial.java;
 
+import gurux.io.Parity;
+import gurux.io.StopBits;
 import gurux.serial.GXSerial;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -83,6 +85,23 @@ public class GXSerialTest extends TestCase {
             serial.close();
         }
         throw new RuntimeException("Invalid serial port open test failed.");
+    }
 
+    /**
+     * Settings test.
+     */
+    public final void testSettings() {
+        String nl = System.getProperty("line.separator");
+        try (GXSerial serial =
+                new GXSerial("COM1", 300, 7, Parity.EVEN, StopBits.ONE)) {
+            String expected = "<Port>COM1</Port>" + nl
+                    + "<BaudRate>300</BaudRate>" + nl + "<Parity>2</Parity>"
+                    + nl + "<DataBits>7</DataBits>" + nl;
+            String actual = serial.getSettings();
+            assertEquals(expected, actual);
+            try (GXSerial serial1 = new GXSerial()) {
+                serial1.setSettings(actual);
+            }
+        }
     }
 }
