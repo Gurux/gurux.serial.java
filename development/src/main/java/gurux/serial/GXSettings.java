@@ -154,7 +154,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         target = comp;
         String[] ports = GXSerial.getPortNames();
         portCB.setModel(new DefaultComboBoxModel<String>(ports));
-        int[] rates = GXSerial.getAvailableBaudRates(null);
+        BaudRate[] rates = GXSerial.getAvailableBaudRates(null);
         baudRate.setModel(new DefaultComboBoxModel<String>(getStrings(rates)));
         // CHECKSTYLE:OFF
         int[] dataBits = new int[] { 7, 8 };
@@ -246,6 +246,23 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
         int pos = 0;
         for (int it : list) {
             tmp[pos] = String.valueOf(it);
+            ++pos;
+        }
+        return tmp;
+    }
+
+    /**
+     * Converts array of integers to array of strings.
+     * 
+     * @param list
+     *            Integer list.
+     * @return String array.
+     */
+    final String[] getStrings(final BaudRate[] list) {
+        String[] tmp = new String[list.length];
+        int pos = 0;
+        for (BaudRate it : list) {
+            tmp[pos] = String.valueOf(it.getValue());
             ++pos;
         }
         return tmp;

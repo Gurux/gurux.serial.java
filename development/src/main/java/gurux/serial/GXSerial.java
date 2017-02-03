@@ -338,15 +338,12 @@ public class GXSerial implements IGXMedia, AutoCloseable {
      *            Name of serial port.
      * @return Collection of available baud rates.
      */
-    public static final int[] getAvailableBaudRates(final String portName) {
-        return new int[] { BaudRate.BAUD_RATE_300.getValue(),
-                BaudRate.BAUD_RATE_600.getValue(),
-                BaudRate.BAUD_RATE_1800.getValue(),
-                BaudRate.BAUD_RATE_2400.getValue(),
-                BaudRate.BAUD_RATE_4800.getValue(),
-                BaudRate.BAUD_RATE_9600.getValue(),
-                BaudRate.BAUD_RATE_19200.getValue(),
-                BaudRate.BAUD_RATE_38400.getValue() };
+    public static final BaudRate[]
+            getAvailableBaudRates(final String portName) {
+        return new BaudRate[] { BaudRate.BAUD_RATE_300, BaudRate.BAUD_RATE_600,
+                BaudRate.BAUD_RATE_1800, BaudRate.BAUD_RATE_2400,
+                BaudRate.BAUD_RATE_4800, BaudRate.BAUD_RATE_9600,
+                BaudRate.BAUD_RATE_19200, BaudRate.BAUD_RATE_38400 };
     }
 
     @Override
@@ -997,7 +994,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
 
     @Override
     public final void setSettings(final String value) {
-        // Reset default values.
+        // Reset to default values.
         portName = "";
         baudRate = BaudRate.BAUD_RATE_9600;
         stopBits = StopBits.ONE;
