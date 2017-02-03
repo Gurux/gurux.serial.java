@@ -42,6 +42,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 
+import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 
@@ -367,7 +368,7 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                                 .addContainerGap().addComponent(dataBitsLbl)
                                 .addGap(50, 50, 50).addComponent(dataBitsCB, 0,
                                         181, Short.MAX_VALUE)
-                        .addContainerGap()));
+                                .addContainerGap()));
         DataBitsPanelLayout.setVerticalGroup(DataBitsPanelLayout
                 .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
@@ -476,10 +477,11 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
                         javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
         jPanel1Layout.setVerticalGroup(jPanel1Layout
                 .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup().addComponent(
-                        portPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(portPanel,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(
                                 javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(baudRatePanel,
@@ -577,8 +579,8 @@ class GXSettings extends javax.swing.JDialog implements ActionListener {
     private void okBtnActionPerformed(final ActionEvent evt) {
         try {
             target.setPortName(this.portCB.getSelectedItem().toString());
-            target.setBaudRate(Integer
-                    .parseInt(this.baudRate.getSelectedItem().toString()));
+            target.setBaudRate(BaudRate.forValue(Integer
+                    .parseInt(this.baudRate.getSelectedItem().toString())));
             target.setDataBits(Integer
                     .parseInt(this.dataBitsCB.getSelectedItem().toString()));
             target.setParity(gurux.io.Parity.valueOf(

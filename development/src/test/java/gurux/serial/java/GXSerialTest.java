@@ -34,6 +34,7 @@
 
 package gurux.serial.java;
 
+import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.serial.GXSerial;
@@ -92,8 +93,8 @@ public class GXSerialTest extends TestCase {
      */
     public final void testSettings() {
         String nl = System.getProperty("line.separator");
-        try (GXSerial serial =
-                new GXSerial("COM1", 300, 7, Parity.EVEN, StopBits.ONE)) {
+        try (GXSerial serial = new GXSerial("COM1", BaudRate.BAUD_RATE_300, 7,
+                Parity.EVEN, StopBits.ONE)) {
             String expected = "<Port>COM1</Port>" + nl
                     + "<BaudRate>300</BaudRate>" + nl + "<Parity>2</Parity>"
                     + nl + "<DataBits>7</DataBits>" + nl;
