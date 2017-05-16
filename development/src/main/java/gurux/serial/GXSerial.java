@@ -281,7 +281,7 @@ public class GXSerial implements IGXMedia, AutoCloseable {
     /**
      * Initialize Gurux serial port library.
      */
-    static void initialize() {
+    private static void initialize() {
         if (!initialized) {
             String path;
             String os = System.getProperty("os.name").toLowerCase();
@@ -294,10 +294,18 @@ public class GXSerial implements IGXMedia, AutoCloseable {
                     path = "win64";
                 }
             } else if (isUnix(os)) {
-                if (is32Bit) {
-                    path = "linux86";
+                if (System.getProperty("os.arch").indexOf("arm") != -1) {
+                    if (is32Bit) {
+                        path = "arm32";
+                    } else {
+                        path = "arm64";
+                    }
                 } else {
-                    path = "linux64";
+                    if (is32Bit) {
+                        path = "linux86";
+                    } else {
+                        path = "linux64";
+                    }
                 }
             } else {
                 throw new RuntimeException("Invald operating system. " + os);
