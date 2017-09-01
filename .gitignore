@@ -222,3 +222,4 @@ src/main/resources/.svn/wc.db
 src/main/resources/.svn/entries
 src/main/resources/.svn/format
 gurux.serial.terminal/dependency-reduced-pom.xml
+*.db

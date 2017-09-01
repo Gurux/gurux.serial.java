@@ -1,10 +1,3 @@
-import gurux.common.GXCommon;
-import gurux.common.IGXMediaListener;
-import gurux.common.MediaStateEventArgs;
-import gurux.common.PropertyChangedEventArgs;
-import gurux.common.ReceiveEventArgs;
-import gurux.common.TraceEventArgs;
-import gurux.serial.GXSerial;
 
 //
 // --------------------------------------------------------------------------
@@ -39,13 +32,20 @@ import gurux.serial.GXSerial;
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
+import gurux.common.GXCommon;
+import gurux.common.IGXMediaListener;
+import gurux.common.MediaStateEventArgs;
+import gurux.common.PropertyChangedEventArgs;
+import gurux.common.ReceiveEventArgs;
+import gurux.common.TraceEventArgs;
+import gurux.serial.GXSerial;
 
 public class app implements IGXMediaListener {
     private GXSerial s;
     private int mode;
 
     /**
-     * Constuctor.
+     * Constructor.
      * 
      * @param target
      */
