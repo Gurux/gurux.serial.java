@@ -54,7 +54,7 @@ import org.xml.sax.InputSource;
 import gurux.common.GXCommon;
 import gurux.common.GXSync;
 import gurux.common.GXSynchronousMediaBase;
-import gurux.common.IGXMedia;
+import gurux.common.IGXMedia2;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
 import gurux.common.PropertyChangedEventArgs;
@@ -75,7 +75,11 @@ import gurux.serial.enums.AvailableMediaSettings;
  * The GXSerial component determines methods that make the communication
  * possible using serial port connection.
  */
-public class GXSerial implements IGXMedia, AutoCloseable {
+public class GXSerial implements IGXMedia2, AutoCloseable {
+
+    private int receiveDelay;
+
+    private int asyncWaitTime;
 
     /**
      * Read buffer size.
@@ -1135,5 +1139,30 @@ public class GXSerial implements IGXMedia, AutoCloseable {
     @Override
     public final void removeListener(final IGXMediaListener listener) {
         mediaListeners.remove(listener);
+    }
+
+    @Override
+    public int getReceiveDelay() {
+        return receiveDelay;
+    }
+
+    @Override
+    public void setReceiveDelay(final int value) {
+        receiveDelay = value;
+    }
+
+    @Override
+    public int getAsyncWaitTime() {
+        return asyncWaitTime;
+    }
+
+    @Override
+    public void setAsyncWaitTime(final int value) {
+        asyncWaitTime = value;
+    }
+
+    @Override
+    public Object getAsyncWaitHandle() {
+        return null;
     }
 }

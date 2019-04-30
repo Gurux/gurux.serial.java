@@ -116,28 +116,31 @@ class GXReceiveThread extends Thread {
         }
         bytesReceived += len;
         int totalCount = 0;
+        synchronized (parentMedia.getSyncBase().getSync()) {
+            parentMedia.getSyncBase().appendData(buffer, 0, len);
+            // Search End of Packet if given.
+            if (parentMedia.getEop() != null) {
+                if (parentMedia.getEop() instanceof Array) {
+                    for (Object eop : (Object[]) parentMedia.getEop()) {
+                        totalCount = GXSynchronousMediaBase.indexOf(buffer,
+                                GXSynchronousMediaBase.getAsByteArray(eop), 0,
+                                len);
+                        if (totalCount != -1) {
+                            break;
+                        }
+                    }
+                } else {
+                    totalCount = GXSynchronousMediaBase.indexOf(buffer,
+                            GXSynchronousMediaBase.getAsByteArray(
+                                    parentMedia.getEop()),
+                            0, len);
+                }
+            }
+        }
+
         if (parentMedia.getIsSynchronous()) {
             gurux.common.TraceEventArgs arg = null;
             synchronized (parentMedia.getSyncBase().getSync()) {
-                parentMedia.getSyncBase().appendData(buffer, 0, len);
-                // Search End of Packet if given.
-                if (parentMedia.getEop() != null) {
-                    if (parentMedia.getEop() instanceof Array) {
-                        for (Object eop : (Object[]) parentMedia.getEop()) {
-                            totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                    GXSynchronousMediaBase.getAsByteArray(eop),
-                                    0, len);
-                            if (totalCount != -1) {
-                                break;
-                            }
-                        }
-                    } else {
-                        totalCount = GXSynchronousMediaBase.indexOf(buffer,
-                                GXSynchronousMediaBase.getAsByteArray(
-                                        parentMedia.getEop()),
-                                0, len);
-                    }
-                }
                 if (totalCount != -1) {
                     if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
                         arg = new gurux.common.TraceEventArgs(
@@ -149,10 +152,9 @@ class GXReceiveThread extends Thread {
             if (arg != null) {
                 parentMedia.notifyTrace(arg);
             }
-        } else {
+        } else if (totalCount != -1) {
+            byte[] data = parentMedia.getSyncBase().getReceivedData();
             parentMedia.getSyncBase().resetReceivedSize();
-            byte[] data = new byte[len];
-            System.arraycopy(buffer, 0, data, 0, len);
             if (parentMedia.getTrace() == TraceLevel.VERBOSE) {
                 parentMedia.notifyTrace(new gurux.common.TraceEventArgs(
                         TraceTypes.RECEIVED, data));
@@ -175,7 +177,18 @@ class GXReceiveThread extends Thread {
                     parentMedia.setClosing(0);
                     break;
                 }
-                handleReceivedData(buff);
+                Thread.sleep(parentMedia.getReceiveDelay());
+                byte[] buff2 = NativeCode.read(this.comPort, 0,
+                        parentMedia.getClosing());
+                if (buff2.length != 0) {
+                    byte[] tmp = new byte[buff.length + buff2.length];
+                    System.arraycopy(buff, 0, tmp, 0, buff.length);
+                    System.arraycopy(buff2, 0, tmp, buff.length, buff2.length);
+                    handleReceivedData(tmp);
+                } else {
+                    handleReceivedData(buff);
+                }
+
             } catch (Exception ex) {
                 if (!Thread.currentThread().isInterrupted()) {
                     parentMedia
