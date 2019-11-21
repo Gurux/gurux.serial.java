@@ -54,6 +54,7 @@ import org.xml.sax.InputSource;
 import gurux.common.GXCommon;
 import gurux.common.GXSync;
 import gurux.common.GXSynchronousMediaBase;
+import gurux.common.IGXMedia;
 import gurux.common.IGXMedia2;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -75,7 +76,7 @@ import gurux.serial.enums.AvailableMediaSettings;
  * The GXSerial component determines methods that make the communication
  * possible using serial port connection.
  */
-public class GXSerial implements IGXMedia2, AutoCloseable {
+public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
 
     private int receiveDelay;
 
@@ -516,10 +517,10 @@ public class GXSerial implements IGXMedia2, AutoCloseable {
                 notifyTrace(new TraceEventArgs(TraceTypes.INFO,
                         "Settings: Port: " + this.getPortName() + " Baud Rate: "
                                 + getBaudRate() + " Data Bits: "
-                                + (new Integer(getDataBits())).toString()
-                                + " Parity: " + getParity().toString()
-                                + " Stop Bits: " + getStopBits().toString()
-                                + " Eop:" + eopString));
+                                + String.valueOf(getDataBits()) + " Parity: "
+                                + String.valueOf(getParity()) + " Stop Bits: "
+                                + String.valueOf(getStopBits()) + " Eop:"
+                                + eopString));
             }
             long[] tmp = new long[1];
             hWnd = NativeCode.openSerialPort(portName, tmp);
