@@ -178,9 +178,17 @@ class GXReceiveThread extends Thread {
                     break;
                 }
                 Thread.sleep(parentMedia.getReceiveDelay());
-                byte[] buff2 = NativeCode.read(this.comPort, 0,
-                        parentMedia.getClosing());
-                if (buff2.length != 0) {
+                byte[] buff2 = null;
+                try {
+                    if (NativeCode.getBytesToRead(this.comPort) != 0) {
+                        buff2 = NativeCode.read(this.comPort, 1,
+                                parentMedia.getClosing());
+                    }
+                } catch (Exception ex) {
+                    // getBytesToRead fails with some chipsets.
+                    // Just ignore it.
+                }
+                if (buff2 != null && buff2.length != 0) {
                     byte[] tmp = new byte[buff.length + buff2.length];
                     System.arraycopy(buff, 0, tmp, 0, buff.length);
                     System.arraycopy(buff2, 0, tmp, buff.length, buff2.length);
