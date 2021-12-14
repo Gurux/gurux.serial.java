@@ -36,6 +36,18 @@
     <developerConnection>scm:git:https://github.com/gurux/gurux.serial.java.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
+  
+    <!-- Update component to Central repository. -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshot</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>nexus-releases</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
   <build>
     <plugins>
       <!-- Generate javadoc. -->
@@ -64,6 +76,23 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M4</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <releaseProfiles>nexus-releases, github</releaseProfiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>nexus-releases</id>
+      <build>
+        <plugins>
       <!--  Sign the component. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -82,23 +111,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M4</version>
-        <configuration>
-          <tagNameFormat>v@{project.version}</tagNameFormat>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <releaseProfiles>github,maven</releaseProfiles>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  <profiles>
-    <profile>
-      <id>maven</id>
-      <build>
-        <plugins>
           <!-- Deployment and release -->
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
@@ -110,7 +122,7 @@
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
-          </plugin>
+          </plugin>      
         </plugins>
       </build>
     </profile>
