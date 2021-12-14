@@ -37,7 +37,7 @@
     <tag>HEAD</tag>
   </scm>
 
- <!-- Update component to Central repository. -->
+  <!-- Update component to Central repository. -->
   <distributionManagement>
     <snapshotRepository>
       <id>nexus-snapshot</id>
@@ -58,14 +58,26 @@
         <version>3.2.0</version>
         <executions>
           <execution>
-           <id>attach-javadocs</id>
-             <goals>
-               <goal>jar</goal>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-      <plugin>       
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>3.0.0-M4</version>
@@ -82,18 +94,6 @@
       <id>releases</id>
       <build>
         <plugins>
-	      <plugin>
-	        <artifactId>maven-source-plugin</artifactId>
-	        <version>3.2.0</version>
-	            <executions>
-	                <execution>
-	                    <id>attach-sources</id>
-	                    <goals>
-	                        <goal>jar</goal>
-	                    </goals>
-	                </execution>
-	            </executions>
-	      </plugin>    
           <!--  Sign the component. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -106,6 +106,9 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <keyname>${gpg.keyname}</keyname>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -125,7 +128,6 @@
       </build>
     </profile>
   </profiles>
-
   <dependencies>
     <dependency>
       <groupId>org.gurux</groupId>
