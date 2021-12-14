@@ -89,7 +89,7 @@
         <configuration>
           <tagNameFormat>v@{project.version}</tagNameFormat>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <releaseProfiles>maven,github</releaseProfiles>
+          <releaseProfiles>github,maven</releaseProfiles>
         </configuration>
       </plugin>
     </plugins>
