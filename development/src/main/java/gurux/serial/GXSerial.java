@@ -169,8 +169,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
     /**
      * Media listeners.
      */
-    private List<IGXMediaListener> mediaListeners =
-            new ArrayList<IGXMediaListener>();
+    private List<IGXMediaListener> mediaListeners = new ArrayList<IGXMediaListener>();
 
     /**
      * Constructor.
@@ -196,9 +195,8 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      * @param stopBitsValue
      *            Stop bits.
      */
-    public GXSerial(final String port, final BaudRate baudRateValue,
-            final int dataBitsValue, final Parity parityValue,
-            final StopBits stopBitsValue) {
+    public GXSerial(final String port, final BaudRate baudRateValue, final int dataBitsValue,
+            final Parity parityValue, final StopBits stopBitsValue) {
         initialize();
         readBufferSize = DEFUALT_READ_BUFFER_SIZE;
         syncBase = new GXSynchronousMediaBase(readBufferSize);
@@ -268,8 +266,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      * @return True if Unix.
      */
     static boolean isUnix(final String os) {
-        return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0
-                || os.indexOf("aix") >= 0);
+        return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") >= 0);
     }
 
     /**
@@ -290,8 +287,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
         if (!initialized) {
             String path;
             String os = System.getProperty("os.name").toLowerCase();
-            boolean is32Bit =
-                    System.getProperty("sun.arch.data.model").equals("32");
+            boolean is32Bit = System.getProperty("sun.arch.data.model").equals("32");
             if (isWindows(os)) {
                 if (is32Bit) {
                     path = "win32";
@@ -301,15 +297,15 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
             } else if (isUnix(os)) {
                 if (System.getProperty("os.arch").indexOf("arm") != -1) {
                     if (is32Bit) {
-                        path = "arm32";
+                        path = "linux32Arm";
                     } else {
-                        path = "arm64";
+                        path = "linux64Arm";
                     }
                 } else {
                     if (is32Bit) {
-                        path = "linux86";
+                        path = "linux86Amd";
                     } else {
-                        path = "linux64";
+                        path = "linux64Amd";
                     }
                 }
             } else {
@@ -319,17 +315,15 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
             try {
                 file = File.createTempFile("gurux.serial.java", ".dll");
             } catch (IOException e1) {
-                throw new RuntimeException(
-                        "Failed to load file. " + path + "/gurux.serial.java");
+                throw new RuntimeException("Failed to load file. " + path + "/gurux.serial.java");
             }
-            try (InputStream in = GXSerial.class.getResourceAsStream("/" + path
-                    + "/" + System.mapLibraryName("gurux.serial.java"))) {
-                Files.copy(in, file.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
+            try (InputStream in = GXSerial.class.getResourceAsStream(
+                    "/" + path + "/" + System.mapLibraryName("gurux.serial.java"))) {
+                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 System.load(file.getAbsolutePath());
             } catch (Exception e) {
-                throw new RuntimeException("Failed to load file. " + path
-                        + "/gurux.serial.java" + e.toString());
+                throw new RuntimeException(
+                        "Failed to load file. " + path + "/gurux.serial.java" + e.toString());
             }
         }
     }
@@ -351,12 +345,10 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      *            Name of serial port.
      * @return Collection of available baud rates.
      */
-    public static final BaudRate[]
-            getAvailableBaudRates(final String portName) {
+    public static final BaudRate[] getAvailableBaudRates(final String portName) {
         return new BaudRate[] { BaudRate.BAUD_RATE_300, BaudRate.BAUD_RATE_600,
-                BaudRate.BAUD_RATE_1800, BaudRate.BAUD_RATE_2400,
-                BaudRate.BAUD_RATE_4800, BaudRate.BAUD_RATE_9600,
-                BaudRate.BAUD_RATE_19200, BaudRate.BAUD_RATE_38400 };
+                BaudRate.BAUD_RATE_1800, BaudRate.BAUD_RATE_2400, BaudRate.BAUD_RATE_4800,
+                BaudRate.BAUD_RATE_9600, BaudRate.BAUD_RATE_19200, BaudRate.BAUD_RATE_38400 };
     }
 
     @Override
@@ -386,8 +378,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      */
     private void notifyPropertyChanged(final String info) {
         for (IGXMediaListener listener : mediaListeners) {
-            listener.onPropertyChanged(this,
-                    new PropertyChangedEventArgs(info));
+            listener.onPropertyChanged(this, new PropertyChangedEventArgs(info));
         }
     }
 
@@ -401,8 +392,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
         for (IGXMediaListener listener : mediaListeners) {
             listener.onError(this, ex);
             if (trace.ordinal() >= TraceLevel.ERROR.ordinal()) {
-                listener.onTrace(this,
-                        new TraceEventArgs(TraceTypes.ERROR, ex));
+                listener.onTrace(this, new TraceEventArgs(TraceTypes.ERROR, ex));
             }
         }
     }
@@ -458,8 +448,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
     }
 
     @Override
-    public final void send(final Object data, final String target)
-            throws Exception {
+    public final void send(final Object data, final String target) throws Exception {
         if (hWnd == 0) {
             throw new RuntimeException("Serial port is not open.");
         }
@@ -472,8 +461,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
         }
         byte[] buff = GXSynchronousMediaBase.getAsByteArray(data);
         if (buff == null) {
-            throw new IllegalArgumentException(
-                    "Data send failed. Invalid data.");
+            throw new IllegalArgumentException("Data send failed. Invalid data.");
         }
         NativeCode.write(hWnd, buff, writeTimeout);
         this.bytesSend += buff.length;
@@ -488,8 +476,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
     private void notifyMediaStateChange(final MediaState state) {
         for (IGXMediaListener listener : mediaListeners) {
             if (trace.ordinal() >= TraceLevel.ERROR.ordinal()) {
-                listener.onTrace(this,
-                        new TraceEventArgs(TraceTypes.INFO, state));
+                listener.onTrace(this, new TraceEventArgs(TraceTypes.INFO, state));
             }
             listener.onMediaStateChange(this, new MediaStateEventArgs(state));
         }
@@ -500,8 +487,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
         close();
         try {
             if (portName == null || portName == "") {
-                throw new IllegalArgumentException(
-                        "Serial port is not selected.");
+                throw new IllegalArgumentException("Serial port is not selected.");
             }
             synchronized (syncBase.getSync()) {
                 syncBase.resetLastPosition();
@@ -515,12 +501,10 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                     eopString = getEop().toString();
                 }
                 notifyTrace(new TraceEventArgs(TraceTypes.INFO,
-                        "Settings: Port: " + this.getPortName() + " Baud Rate: "
-                                + getBaudRate() + " Data Bits: "
-                                + String.valueOf(getDataBits()) + " Parity: "
+                        "Settings: Port: " + this.getPortName() + " Baud Rate: " + getBaudRate()
+                                + " Data Bits: " + String.valueOf(getDataBits()) + " Parity: "
                                 + String.valueOf(getParity()) + " Stop Bits: "
-                                + String.valueOf(getStopBits()) + " Eop:"
-                                + eopString));
+                                + String.valueOf(getStopBits()) + " Eop:" + eopString));
             }
             long[] tmp = new long[1];
             hWnd = NativeCode.openSerialPort(portName, tmp);
@@ -1016,8 +1000,7 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
 
         if (value != null && !value.isEmpty()) {
             try {
-                DocumentBuilderFactory factory =
-                        DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 StringBuilder sb = new StringBuilder();
                 if (value.startsWith("<?xml version=\"1.0\"?>")) {
@@ -1031,14 +1014,12 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                     sb.append(nl);
                     sb.append("</Net>");
                 }
-                InputSource is =
-                        new InputSource(new StringReader(sb.toString()));
+                InputSource is = new InputSource(new StringReader(sb.toString()));
                 Document doc = builder.parse(is);
                 doc.getDocumentElement().normalize();
                 NodeList nList = doc.getChildNodes();
                 if (nList.getLength() != 1) {
-                    throw new IllegalArgumentException(
-                            "Invalid XML root node.");
+                    throw new IllegalArgumentException("Invalid XML root node.");
                 }
                 nList = nList.item(0).getChildNodes();
                 for (int pos = 0; pos < nList.getLength(); ++pos) {
@@ -1046,22 +1027,17 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                     if (it.getNodeType() == Node.ELEMENT_NODE) {
                         if ("Port".equalsIgnoreCase(it.getNodeName())) {
                             setPortName(it.getFirstChild().getNodeValue());
-                        } else if ("BaudRate"
-                                .equalsIgnoreCase(it.getNodeName())) {
-                            setBaudRate(BaudRate.forValue(Integer.parseInt(
-                                    it.getFirstChild().getNodeValue())));
-                        } else if ("StopBits"
-                                .equalsIgnoreCase(it.getNodeName())) {
-                            setStopBits(StopBits.values()[Integer.parseInt(
-                                    it.getFirstChild().getNodeValue())]);
-                        } else if ("Parity"
-                                .equalsIgnoreCase(it.getNodeName())) {
-                            setParity(Parity.values()[Integer.parseInt(
-                                    it.getFirstChild().getNodeValue())]);
-                        } else if ("DataBits"
-                                .equalsIgnoreCase(it.getNodeName())) {
-                            setDataBits(Integer.parseInt(
-                                    it.getFirstChild().getNodeValue()));
+                        } else if ("BaudRate".equalsIgnoreCase(it.getNodeName())) {
+                            setBaudRate(BaudRate
+                                    .forValue(Integer.parseInt(it.getFirstChild().getNodeValue())));
+                        } else if ("StopBits".equalsIgnoreCase(it.getNodeName())) {
+                            setStopBits(StopBits.values()[Integer
+                                    .parseInt(it.getFirstChild().getNodeValue())]);
+                        } else if ("Parity".equalsIgnoreCase(it.getNodeName())) {
+                            setParity(Parity.values()[Integer
+                                    .parseInt(it.getFirstChild().getNodeValue())]);
+                        } else if ("DataBits".equalsIgnoreCase(it.getNodeName())) {
+                            setDataBits(Integer.parseInt(it.getFirstChild().getNodeValue()));
                         }
                     }
                 }
