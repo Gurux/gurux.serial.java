@@ -295,7 +295,10 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                     path = "win64";
                 }
             } else if (isUnix(os)) {
-                if (System.getProperty("os.arch").indexOf("arm") != -1) {
+                String str = System.getProperty("os.arch");
+                if (str.indexOf("aarch64") != -1) {
+                    path = "aarch64";
+                } else if (str.indexOf("arm") != -1) {
                     if (is32Bit) {
                         path = "linux32Arm";
                     } else {
