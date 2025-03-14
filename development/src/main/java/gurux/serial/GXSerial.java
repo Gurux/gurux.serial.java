@@ -195,8 +195,8 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      * @param stopBitsValue
      *            Stop bits.
      */
-    public GXSerial(final String port, final BaudRate baudRateValue, final int dataBitsValue,
-            final Parity parityValue, final StopBits stopBitsValue) {
+    public GXSerial(final String port, final BaudRate baudRateValue, final int dataBitsValue, final Parity parityValue,
+            final StopBits stopBitsValue) {
         initialize();
         readBufferSize = DEFUALT_READ_BUFFER_SIZE;
         syncBase = new GXSynchronousMediaBase(readBufferSize);
@@ -320,13 +320,12 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
             } catch (IOException e1) {
                 throw new RuntimeException("Failed to load file. " + path + "/gurux.serial.java");
             }
-            try (InputStream in = GXSerial.class.getResourceAsStream(
-                    "/" + path + "/" + System.mapLibraryName("gurux.serial.java"))) {
+            try (InputStream in =
+                    GXSerial.class.getResourceAsStream("/" + path + "/" + System.mapLibraryName("gurux.serial.java"))) {
                 Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 System.load(file.getAbsolutePath());
             } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to load file. " + path + "/gurux.serial.java" + e.toString());
+                throw new RuntimeException("Failed to load file. " + path + "/gurux.serial.java" + e.toString());
             }
         }
     }
@@ -349,9 +348,9 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
      * @return Collection of available baud rates.
      */
     public static final BaudRate[] getAvailableBaudRates(final String portName) {
-        return new BaudRate[] { BaudRate.BAUD_RATE_300, BaudRate.BAUD_RATE_600,
-                BaudRate.BAUD_RATE_1800, BaudRate.BAUD_RATE_2400, BaudRate.BAUD_RATE_4800,
-                BaudRate.BAUD_RATE_9600, BaudRate.BAUD_RATE_19200, BaudRate.BAUD_RATE_38400 };
+        return new BaudRate[] { BaudRate.BAUD_RATE_300, BaudRate.BAUD_RATE_600, BaudRate.BAUD_RATE_1800,
+                BaudRate.BAUD_RATE_2400, BaudRate.BAUD_RATE_4800, BaudRate.BAUD_RATE_9600, BaudRate.BAUD_RATE_19200,
+                BaudRate.BAUD_RATE_38400, BaudRate.BAUD_RATE_57600, BaudRate.BAUD_RATE_115200 };
     }
 
     @Override
@@ -504,10 +503,9 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                     eopString = getEop().toString();
                 }
                 notifyTrace(new TraceEventArgs(TraceTypes.INFO,
-                        "Settings: Port: " + this.getPortName() + " Baud Rate: " + getBaudRate()
-                                + " Data Bits: " + String.valueOf(getDataBits()) + " Parity: "
-                                + String.valueOf(getParity()) + " Stop Bits: "
-                                + String.valueOf(getStopBits()) + " Eop:" + eopString));
+                        "Settings: Port: " + this.getPortName() + " Baud Rate: " + getBaudRate() + " Data Bits: "
+                                + String.valueOf(getDataBits()) + " Parity: " + String.valueOf(getParity())
+                                + " Stop Bits: " + String.valueOf(getStopBits()) + " Eop:" + eopString));
             }
             long[] tmp = new long[1];
             hWnd = NativeCode.openSerialPort(portName, tmp);
@@ -1031,14 +1029,11 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
                         if ("Port".equalsIgnoreCase(it.getNodeName())) {
                             setPortName(it.getFirstChild().getNodeValue());
                         } else if ("BaudRate".equalsIgnoreCase(it.getNodeName())) {
-                            setBaudRate(BaudRate
-                                    .forValue(Integer.parseInt(it.getFirstChild().getNodeValue())));
+                            setBaudRate(BaudRate.forValue(Integer.parseInt(it.getFirstChild().getNodeValue())));
                         } else if ("StopBits".equalsIgnoreCase(it.getNodeName())) {
-                            setStopBits(StopBits.values()[Integer
-                                    .parseInt(it.getFirstChild().getNodeValue())]);
+                            setStopBits(StopBits.values()[Integer.parseInt(it.getFirstChild().getNodeValue())]);
                         } else if ("Parity".equalsIgnoreCase(it.getNodeName())) {
-                            setParity(Parity.values()[Integer
-                                    .parseInt(it.getFirstChild().getNodeValue())]);
+                            setParity(Parity.values()[Integer.parseInt(it.getFirstChild().getNodeValue())]);
                         } else if ("DataBits".equalsIgnoreCase(it.getNodeName())) {
                             setDataBits(Integer.parseInt(it.getFirstChild().getNodeValue()));
                         }
