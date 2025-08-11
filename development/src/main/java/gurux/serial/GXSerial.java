@@ -943,13 +943,18 @@ public class GXSerial implements IGXMedia, IGXMedia2, AutoCloseable {
 
     @Override
     public final long getBytesReceived() {
-        return receiver.getBytesReceived();
+        if (receiver != null) {
+            return receiver.getBytesReceived();
+        }
+        return 0;
     }
 
     @Override
     public final void resetByteCounters() {
         bytesSend = 0;
-        receiver.resetBytesReceived();
+        if (receiver != null) {
+            receiver.resetBytesReceived();
+        }
     }
 
     @Override
