@@ -5,23 +5,23 @@
   <version>1.0.30-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>gurux.serial.java</name>
-  <url>http://www.gurux.org</url>
+  <url>http://www.gurux.fi</url>
   <description>gurux.serial.java package is used to communicate with serial port.</description>
   <developers>
     <developer>
       <id>Gurux</id>
       <name>Gurux Ltd.</name>
-      <email>gurux@gurux.org</email>
-      <url>http://www.gurux.org</url>
+      <email>gurux@gurux.fi</email>
+      <url>http://www.gurux.fi</url>
       <organization>Gurux Ltd.</organization>
-      <organizationUrl>http://www.gurux.org</organizationUrl>
+      <organizationUrl>http://www.gurux.fi</organizationUrl>
       <roles>
         <role>architect</role>
         <role>developer</role>
       </roles>
       <timezone>Europe/Helsinki</timezone>
       <properties>
-        <picUrl>http://www.gurux.org/images/gurux-avatar.png</picUrl>
+        <picUrl>http://www.gurux.fi/images/gurux-avatar.png</picUrl>
       </properties>
     </developer>
   </developers>
@@ -42,7 +42,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.10.0</version>
+        <version>3.12.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -64,6 +64,16 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <releaseProfiles>releases</releaseProfiles>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>
@@ -75,7 +85,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -93,7 +103,7 @@
           <plugin>
           <groupId>org.sonatype.central</groupId>
           <artifactId>central-publishing-maven-plugin</artifactId>
-          <version>0.8.0</version>
+          <version>0.9.0</version>
           <extensions>true</extensions>
           <configuration>
             <publishingServerId>central</publishingServerId>
@@ -109,7 +119,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.common</artifactId>
-      <version>1.0.17</version>
+      <version>1.0.18</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -125,7 +135,7 @@
     </license>
   </licenses>
   <organization>
-    <url>http://www.gurux.org</url>
+    <url>http://www.gurux.fi</url>
     <name>Gurux Ltd.</name>
   </organization>
 </project>
