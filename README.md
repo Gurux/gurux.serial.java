@@ -20,7 +20,7 @@ You can get source codes from http://www.github.com/gurux or if you use Maven ad
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.serial</artifactId>
-  <version1.0.26</version>
+  <version>1.0.26</version>
 </dependency>
 ```
 
